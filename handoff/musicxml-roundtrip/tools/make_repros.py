@@ -191,6 +191,46 @@ REPROS["08-direction-hidden-staff"] = score("direction on hidden staff", [
             words("Recit.", staff=2), note("C", 4, dur=16, typ="whole", staff=2, voice=5)),
 ])
 
+# 10. Triplet printed without number and without bracket.
+TRIPLET = ("<note><pitch><step>{step}</step><octave>4</octave></pitch><duration>{dur}</duration><voice>1</voice>"
+           "<type>eighth</type><time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes>"
+           "</time-modification>{notations}</note>")
+REPROS["10-tuplet-hidden-number-bracket"] = score("tuplet without number and bracket", [
+    measure(1, attributes(clef("G", 2), extra="").replace("<divisions>4</divisions>", "<divisions>6</divisions>"),
+            TRIPLET.format(step="C", dur=2, notations='<notations><tuplet type="start" bracket="no" show-number="none"/></notations>'),
+            TRIPLET.format(step="D", dur=2, notations=""),
+            TRIPLET.format(step="E", dur=2, notations='<notations><tuplet type="stop"/></notations>'),
+            "<note><pitch><step>F</step><octave>4</octave></pitch><duration>18</duration><voice>1</voice>"
+            "<type>half</type><dot/></note>"),
+])
+
+# 11. Notehead in parentheses.
+REPROS["11-notehead-parentheses"] = score("notehead parentheses", [
+    measure(1, attributes(clef("G", 2)),
+            note("C", 5).replace("</type>", '</type><notehead parentheses="yes">normal</notehead>'),
+            note("D", 5), note("E", 5, dur=8, typ="half")),
+])
+
+# 12. Alterations without <accidental>: one needs a sign by the key (F sharp in C major), one does not.
+REPROS["12-alter-without-accidental"] = score("alter without accidental", [
+    measure(1, attributes(clef("G", 2)),
+            note("F", 4, alter=1), note("G", 4), note("F", 4, alter=1), note("E", 4)),
+    measure(2, "<attributes><key><fifths>1</fifths></key></attributes>",
+            note("F", 4, alter=1), note("G", 4), note("A", 4), note("B", 4)),
+])
+
+# 13. Per-staff transposition: staff 1 an oboe d'amore in A, staff 2 a cue staff at concert pitch.
+REPROS["13-per-staff-transpose"] = score("per-staff transpose", [
+    measure(1, attributes(clef("G", 2, 1) + clef("G", 2, 2), staves=2,
+                          extra='<transpose number="1"><diatonic>-2</diatonic><chromatic>-3</chromatic></transpose>'
+                                '<transpose number="2"><diatonic>0</diatonic><chromatic>0</chromatic></transpose>'
+                          ).replace("<key><fifths>0</fifths></key>",
+                                    '<key number="1"><fifths>3</fifths></key><key number="2"><fifths>0</fifths></key>'),
+            note("E", 5, dur=16, typ="whole", staff=1),
+            backup(),
+            note("C", 5, dur=16, typ="whole", staff=2, voice=5)),
+])
+
 
 def main(outdir):
     out = Path(outdir)
