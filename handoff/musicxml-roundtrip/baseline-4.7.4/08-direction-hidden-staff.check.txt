@@ -1,0 +1,7 @@
+category            in     out    lost  gained
+clef                 2       2       0       0
+key                  1       1       0       0
+note                 1       1       0       0
+staff-details        1       0       1       0
+words                2       2       0       0
+  lost: staff-details part 0 measure-index 0 staff 1:  size= print-object=no

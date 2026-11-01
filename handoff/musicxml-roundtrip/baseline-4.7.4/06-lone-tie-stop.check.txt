@@ -1,0 +1,8 @@
+category            in     out    lost  gained
+clef                 1       1       0       0
+key                  1       1       0       0
+note                 3       3       1       1
+tied                 1       0       1       0
+  lost: note part 0 measure-index 0 staff 1: A4:quarter/1 tie=stop
+  lost: tied part 0 measure-index 0 staff 1: A4 stop
+  gained: note part 0 measure-index 0 staff 1: A4:quarter/1

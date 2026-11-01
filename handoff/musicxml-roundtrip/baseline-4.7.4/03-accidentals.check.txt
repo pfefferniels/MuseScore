@@ -1,0 +1,12 @@
+category            in     out    lost  gained
+accidental           7       4       5       2
+clef                 2       2       0       0
+key                  1       1       0       0
+note                15      15       0       0
+  lost: accidental part 0 measure-index 0 staff 1: A3 natural 
+  lost: accidental part 0 measure-index 1 staff 1: A3 natural 
+  lost: accidental part 0 measure-index 1 staff 1: A[-1]4 flat 
+  lost: accidental part 0 measure-index 2 staff 1: D5 natural 
+  lost: accidental part 0 measure-index 3 staff 1: D5 natural 
+  gained: accidental part 0 measure-index 1 staff 1: A3 natural cautionary=yes,parentheses=no
+  gained: accidental part 0 measure-index 3 staff 1: D5 natural cautionary=yes,parentheses=no

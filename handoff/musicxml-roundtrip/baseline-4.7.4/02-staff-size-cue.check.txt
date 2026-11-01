@@ -1,0 +1,17 @@
+category            in     out    lost  gained
+clef                 2       2       0       0
+key                  1       1       0       0
+lyric                6       6       0       0
+note                 6       6       5       5
+staff-details        1       0       1       0
+  lost: note part 0 measure-index 0 staff 1: A3:quarter/1 cue size=cue
+  lost: note part 0 measure-index 0 staff 1: B3:quarter/1 cue size=cue
+  lost: note part 0 measure-index 0 staff 1: C4:half/2 cue size=cue
+  lost: note part 0 measure-index 0 staff 2: A3:quarter/1 cue size=cue
+  lost: note part 0 measure-index 0 staff 2: B3:quarter/1 cue size=cue
+  lost: staff-details part 0 measure-index 0 staff 1: cue size=75 
+  gained: note part 0 measure-index 0 staff 1: A3:quarter/1 cue
+  gained: note part 0 measure-index 0 staff 1: B3:quarter/1 cue
+  gained: note part 0 measure-index 0 staff 1: C4:half/2 cue
+  gained: note part 0 measure-index 0 staff 2: A3:quarter/1 cue
+  gained: note part 0 measure-index 0 staff 2: B3:quarter/1 cue

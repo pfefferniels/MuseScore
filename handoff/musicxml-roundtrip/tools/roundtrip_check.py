@@ -1,0 +1,170 @@
+"""Semantic comparison of a MusicXML file with its MuseScore round trip.
+
+    python3 roundtrip_check.py in.musicxml out.musicxml [--details N]
+
+Compares per (part, measure index, staff) the multisets of musical facts listed in FACTS and prints a loss/gain
+table per category. Byte identity is not the target: MuseScore rewrites identification, defaults, positions and
+element order. The normalisations below remove differences that carry no musical meaning.
+"""
+import argparse
+import sys
+import xml.etree.ElementTree as ET
+from collections import Counter
+from dataclasses import dataclass
+from fractions import Fraction
+from itertools import accumulate
+from typing import Callable, Iterator
+
+
+@dataclass(frozen=True, order=True)
+class Fact:
+    category: str
+    part: int
+    measure: int
+    staff: str
+    value: str
+
+
+def text_of(el: ET.Element | None, path: str, default: str = "") -> str:
+    return default if el is None else (el.findtext(path) or default).strip()
+
+
+def staff_of(el: ET.Element) -> str:
+    return text_of(el, "staff", "1")
+
+
+def attrs(el: ET.Element | None, *names: str) -> str:
+    if el is None:
+        return ""
+    return ",".join(f"{n}={el.get(n)}" for n in names if el.get(n) is not None)
+
+
+def pitch(note: ET.Element) -> str:
+    if note.find("rest") is not None:
+        return "rest"
+    alter = text_of(note, "pitch/alter", "0")
+    return text_of(note, "pitch/step") + ("" if alter == "0" else f"[{alter}]") + text_of(note, "pitch/octave")
+
+
+def note_value(note: ET.Element, divisions: int) -> str:
+    type_el = note.find("type")
+    flags = [
+        "cue" if note.find("cue") is not None else "",
+        "grace" if note.find("grace") is not None else "",
+        "chord" if note.find("chord") is not None else "",
+        "size=" + type_el.get("size") if type_el is not None and type_el.get("size") else "",
+        "tie=" + "+".join(sorted(t.get("type") for t in note.findall("tie"))) if note.find("tie") is not None else "",
+    ]
+    duration = Fraction(int(text_of(note, "duration", "0")), divisions)
+    dots = len(note.findall("dot"))
+    return f"{pitch(note)}:{text_of(note, 'type', '-')}{'.' * dots}/{duration} {' '.join(f for f in flags if f)}".strip()
+
+
+def is_filler_rest(note: ET.Element) -> bool:
+    """Whole-measure rests MuseScore adds to otherwise empty staves or voices."""
+    rest = note.find("rest")
+    return rest is not None and rest.get("measure") == "yes" and note.find("cue") is None
+
+
+def note_facts(note: ET.Element, divisions: int) -> Iterator[tuple[str, str]]:
+    yield "note", note_value(note, divisions)
+    accidental = note.find("accidental")
+    if accidental is not None:
+        yield "accidental", f"{pitch(note)} {accidental.text} {attrs(accidental, 'cautionary', 'editorial', 'parentheses', 'bracket', 'size')}"
+    for tied in note.findall("notations/tied"):
+        yield "tied", f"{pitch(note)} {tied.get('type')}"
+    for lyric in note.findall("lyric"):
+        extend = lyric.find("extend")
+        ext = "" if extend is None else f" extend={extend.get('type', 'none')}"
+        yield "lyric", f"{lyric.get('number', '1')} {text_of(lyric, 'syllabic')} {''.join(t.text or '' for t in lyric.findall('text'))}{ext}"
+
+
+def attribute_facts(attributes: ET.Element) -> Iterator[tuple[str, str, str]]:
+    for clef in attributes.findall("clef"):
+        value = f"{text_of(clef, 'sign')}{text_of(clef, 'line')}{text_of(clef, 'clef-octave-change')} {attrs(clef, 'size', 'after-barline')}"
+        yield clef.get("number", "1"), "clef", value.strip()
+    for key in attributes.findall("key"):
+        yield key.get("number", "all"), "key", text_of(key, "fifths")
+    for details in attributes.findall("staff-details"):
+        value = f"{text_of(details, 'staff-type')} size={text_of(details, 'staff-size')} {attrs(details, 'print-object')}"
+        yield details.get("number", "1"), "staff-details", value
+    for transpose in attributes.findall("transpose"):
+        yield transpose.get("number", "all"), "transpose", f"{text_of(transpose, 'diatonic')}/{text_of(transpose, 'chromatic')}/{text_of(transpose, 'octave-change')}"
+
+
+def direction_facts(direction: ET.Element) -> Iterator[tuple[str, str]]:
+    for words in direction.findall("direction-type/words"):
+        yield "words", (words.text or "").strip()
+    for dynamics in direction.findall("direction-type/dynamics"):
+        yield "dynamics", " ".join(child.tag for child in dynamics)
+
+
+def is_trailing(measure: ET.Element, index: int) -> bool:
+    """No note or forward follows, so the element takes effect where the next measure starts."""
+    return not any(c.tag in ("note", "forward") for c in list(measure)[index + 1:])
+
+
+def measure_facts(part_index: int, measure_index: int, measure: ET.Element, divisions: int) -> Iterator[Fact]:
+    def fact(category: str, staff: str, value: str, index: int = measure_index) -> Fact:
+        return Fact(category, part_index, index, staff, value)
+
+    for position, child in enumerate(measure):
+        if child.tag == "note" and not is_filler_rest(child):
+            yield from (fact(c, staff_of(child), v) for c, v in note_facts(child, divisions))
+        elif child.tag == "attributes":
+            index = measure_index + is_trailing(measure, position)
+            yield from (fact(c, staff, v, index) for staff, c, v in attribute_facts(child))
+        elif child.tag == "direction":
+            yield from (fact(c, staff_of(child), v) for c, v in direction_facts(child))
+        elif child.tag == "figured-bass":
+            figures = " ".join(f"{text_of(f, 'prefix')}{text_of(f, 'figure-number')}{text_of(f, 'suffix')}" for f in child.findall("figure"))
+            yield fact("figured-bass", "1", figures)
+        elif child.tag == "barline":
+            yield fact("barline", "all", f"{child.get('location', 'right')} {text_of(child, 'bar-style')}")
+        elif child.tag == "print":
+            breaks = attrs(child, "new-system", "new-page")
+            if breaks:
+                yield fact("break", "all", breaks)
+
+
+def divisions_per_measure(measures: list[ET.Element]) -> list[int]:
+    """Divisions in force in each measure (a change in a measure applies from that measure on)."""
+    def step(current: int, measure: ET.Element) -> int:
+        return int(text_of(measure, "attributes/divisions", str(current)))
+    return list(accumulate(measures, step, initial=1))[1:]
+
+
+def facts(path: str) -> Counter:
+    root = ET.parse(path).getroot()
+    return Counter(
+        f
+        for p, part in enumerate(root.findall("part"))
+        for m, (measure, divisions) in enumerate(zip(part.findall("measure"), divisions_per_measure(part.findall("measure"))))
+        for f in measure_facts(p, m, measure, divisions)
+    )
+
+
+def report(before: Counter, after: Counter, details: int, out: Callable[[str], None] = print) -> bool:
+    lost, gained = before - after, after - before
+    categories = sorted({f.category for f in before | after})
+    out(f"{'category':<14}{'in':>8}{'out':>8}{'lost':>8}{'gained':>8}")
+    for c in categories:
+        count = lambda counter: sum(n for f, n in counter.items() if f.category == c)
+        out(f"{c:<14}{count(before):>8}{count(after):>8}{count(lost):>8}{count(gained):>8}")
+    for label, diff in (("lost", lost), ("gained", gained)):
+        for f in sorted(diff)[:details]:
+            out(f"  {label}: {f.category} part {f.part} measure-index {f.measure} staff {f.staff}: {f.value}")
+    return not lost and not gained
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("before")
+    parser.add_argument("after")
+    parser.add_argument("--details", type=int, default=20, help="examples to print per direction")
+    args = parser.parse_args()
+    return 0 if report(facts(args.before), facts(args.after), args.details) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

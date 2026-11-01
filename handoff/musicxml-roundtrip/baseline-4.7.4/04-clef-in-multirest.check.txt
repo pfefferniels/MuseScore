@@ -1,0 +1,13 @@
+category            in     out    lost  gained
+clef                 2       3       0       1
+key                  1       1       0       0
+note                 4       4       4       4
+  lost: note part 0 measure-index 3 staff 1: C3:quarter/1 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: D3:quarter/1 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: E3:quarter/1 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: F3:quarter/1 cue size=cue
+  gained: clef part 0 measure-index 3 staff 1: F4 after-barline=yes
+  gained: note part 0 measure-index 3 staff 1: C3:quarter/1 cue
+  gained: note part 0 measure-index 3 staff 1: D3:quarter/1 cue
+  gained: note part 0 measure-index 3 staff 1: E3:quarter/1 cue
+  gained: note part 0 measure-index 3 staff 1: F3:quarter/1 cue

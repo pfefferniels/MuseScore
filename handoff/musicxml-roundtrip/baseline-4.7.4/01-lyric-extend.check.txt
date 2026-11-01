@@ -1,0 +1,16 @@
+category            in     out    lost  gained
+clef                 1       1       0       0
+key                  1       1       0       0
+lyric               11       6       8       3
+note                 7       7       0       0
+  lost: lyric part 0 measure-index 0 staff 1: 1   extend=continue
+  lost: lyric part 0 measure-index 0 staff 1: 1   extend=stop
+  lost: lyric part 0 measure-index 0 staff 1: 1 single Ah extend=start
+  lost: lyric part 0 measure-index 0 staff 1: 2   extend=continue
+  lost: lyric part 0 measure-index 0 staff 1: 2   extend=stop
+  lost: lyric part 0 measure-index 0 staff 1: 2 single Oh extend=start
+  lost: lyric part 0 measure-index 1 staff 1: 1   extend=stop
+  lost: lyric part 0 measure-index 1 staff 1: 1 single so extend=start
+  gained: lyric part 0 measure-index 0 staff 1: 1 single Ah extend=none
+  gained: lyric part 0 measure-index 0 staff 1: 2 single Oh extend=none
+  gained: lyric part 0 measure-index 1 staff 1: 1 single so extend=none

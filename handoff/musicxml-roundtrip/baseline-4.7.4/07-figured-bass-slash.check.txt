@@ -1,0 +1,5 @@
+category            in     out    lost  gained
+clef                 1       1       0       0
+figured-bass         3       3       0       0
+key                  1       1       0       0
+note                 3       3       0       0

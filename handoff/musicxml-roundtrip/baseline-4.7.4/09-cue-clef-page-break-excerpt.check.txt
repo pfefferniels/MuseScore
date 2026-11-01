@@ -1,0 +1,50 @@
+category            in     out    lost  gained
+accidental           1       1       0       0
+barline              2       2       0       0
+break                1       1       0       0
+clef                 3       3       1       1
+key                  1       1       0       0
+note                33      33      25      25
+words                2       2       0       0
+  lost: clef part 0 measure-index 2 staff 1: G2-1 size=cue,after-barline=yes
+  lost: note part 0 measure-index 2 staff 1: B[-1]3:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 2 staff 1: C4:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 2 staff 1: F3:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 2 staff 1: rest:quarter/1 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: A3:16th/1/4 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: A3:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: B[-1]3:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: C4:16th/1/4 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: D4:16th/1/4 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: D4:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: E[-1]4:16th/1/4 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: F4:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: G3:16th/1/4 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: G4:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: rest:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 3 staff 1: rest:half./3 cue size=cue
+  lost: note part 0 measure-index 4 staff 1: B[-1]2:half/2 cue size=cue
+  lost: note part 0 measure-index 4 staff 1: B[-1]3:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 4 staff 1: F3:eighth/1/2 cue size=cue
+  lost: note part 0 measure-index 4 staff 1: F3:quarter/1 cue size=cue
+  gained: clef part 0 measure-index 2 staff 1: G2-1 after-barline=yes
+  gained: note part 0 measure-index 2 staff 1: B[-1]3:eighth/1/2 cue
+  gained: note part 0 measure-index 2 staff 1: C4:eighth/1/2 cue
+  gained: note part 0 measure-index 2 staff 1: F3:eighth/1/2 cue
+  gained: note part 0 measure-index 2 staff 1: rest:quarter/1 size=cue
+  gained: note part 0 measure-index 3 staff 1: A3:16th/1/4 cue
+  gained: note part 0 measure-index 3 staff 1: A3:eighth/1/2 cue
+  gained: note part 0 measure-index 3 staff 1: B[-1]3:eighth/1/2 cue
+  gained: note part 0 measure-index 3 staff 1: C4:16th/1/4 cue
+  gained: note part 0 measure-index 3 staff 1: D4:16th/1/4 cue
+  gained: note part 0 measure-index 3 staff 1: D4:eighth/1/2 cue
+  gained: note part 0 measure-index 3 staff 1: E[-1]4:16th/1/4 cue
+  gained: note part 0 measure-index 3 staff 1: F4:eighth/1/2 cue
+  gained: note part 0 measure-index 3 staff 1: G3:16th/1/4 cue
+  gained: note part 0 measure-index 3 staff 1: G4:eighth/1/2 cue
+  gained: note part 0 measure-index 3 staff 1: rest:eighth/1/2 size=cue
+  gained: note part 0 measure-index 3 staff 1: rest:half./3 size=cue
+  gained: note part 0 measure-index 4 staff 1: B[-1]2:half/2 cue
+  gained: note part 0 measure-index 4 staff 1: B[-1]3:eighth/1/2 cue
+  gained: note part 0 measure-index 4 staff 1: F3:eighth/1/2 cue
+  gained: note part 0 measure-index 4 staff 1: F3:quarter/1 cue
