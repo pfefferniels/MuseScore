@@ -3877,6 +3877,29 @@ static void terminateInferredLine(const std::vector<TextLineBase*> lines, const 
 }
 
 //---------------------------------------------------------
+//   isAllItalic
+//---------------------------------------------------------
+
+/**
+ Whether all visible text of formatted words is italic. The expression style is
+ italic, and a run without <i> does not switch italic off, so only text that is
+ italic throughout keeps its look as an expression.
+ */
+
+static bool isAllItalic(const String& formattedText)
+{
+    static const std::wregex italicRuns(LR"(<i>[\s\S]*?</i>)");
+    static const std::wregex tags(LR"(<[^>]*>)");
+    if (!formattedText.contains(u"<i>")) {
+        return false;
+    }
+    String outside = formattedText;
+    outside.remove(italicRuns);
+    outside.remove(tags);
+    return outside.trimmed().isEmpty();
+}
+
+//---------------------------------------------------------
 //   direction
 //---------------------------------------------------------
 
@@ -4044,7 +4067,7 @@ void MusicXmlParserDirection::direction(const String& partId,
                 } else {
                     technique = getPlayingTechnique();
                 }
-                isExpressionText = m_wordsText.contains(u"<i>") && m_metroText.empty() && placement() == u"below";
+                isExpressionText = isAllItalic(m_wordsText) && m_metroText.empty() && placement() == u"below";
                 if (isExpressionText) {
                     t = Factory::createExpression(m_score->dummy());
                 } else if (m_systemDirection) {

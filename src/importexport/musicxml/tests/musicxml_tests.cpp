@@ -1792,6 +1792,12 @@ TEST_F(MusicXml_Tests, hiddenStaves)
 
     EXPECT_EQ(score->style().value(Sid::hideEmptyStaves).toBool(), true);
 }
+TEST_F(MusicXml_Tests, wordsMixedItalic1) {
+    musicXmlImportTestRef("testWordsMixedItalic");
+}
+TEST_F(MusicXml_Tests, wordsMixedItalic2) {
+    musicXmlIoTestRef("testWordsMixedItalic");
+}
 TEST_F(MusicXml_Tests, wordsHiddenStaff1) {
     musicXmlImportTestRef("testWordsHiddenStaff");
 }
