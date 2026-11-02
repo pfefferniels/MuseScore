@@ -5885,10 +5885,14 @@ void ExportMusicXml::textLine(TextLineBase const* const tl, staff_idx_t staff, c
 
     String lineEnd;
     switch (hookType) {
-    case HookType::HOOK_90:
-        lineEnd = (tl->placement() == PlacementV::BELOW) ? u"up" : u"down";
+    case HookType::HOOK_90: {
+        // a positive hook height points towards the staff, MusicXML's line-end is up or down on the page
+        const bool towardsStaff = hookHeight >= 0;
+        const bool below = tl->placement() == PlacementV::BELOW;
+        lineEnd = (below == towardsStaff) ? u"up" : u"down";
         rest += String(u" end-length=\"%1\"").arg(std::abs(hookHeight * 10));
         break;
+    }
     case HookType::HOOK_90T:
         lineEnd = u"both";
         rest += String(u" end-length=\"%1\"").arg(std::abs(hookHeight * 20));

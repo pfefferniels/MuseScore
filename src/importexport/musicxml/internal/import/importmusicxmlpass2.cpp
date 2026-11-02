@@ -5616,6 +5616,22 @@ void MusicXmlParserDirection::handleDrumInstrument(bool isPerc, Fraction tick) c
 }
 
 //---------------------------------------------------------
+//   hookPointsAwayFromStaff
+//---------------------------------------------------------
+
+/**
+ MusicXML's line-end "up" and "down" are directions on the page, while a positive
+ MuseScore hook height points towards the staff. Return true if the hook of a line
+ with this line-end, drawn below or above the staff, points away from the staff,
+ i.e. needs a negative height.
+ */
+
+static bool hookPointsAwayFromStaff(const AsciiStringView lineEnd, const bool lineBelow)
+{
+    return (lineEnd == "up") != lineBelow;
+}
+
+//---------------------------------------------------------
 //   bracket
 //---------------------------------------------------------
 
@@ -5633,6 +5649,8 @@ void MusicXmlParserDirection::bracket(const String& type, const int number,
     const bool isWavy = lineType == "wavy";
     const ElementType elementType = isWavy ? ElementType::TRILL : ElementType::TEXTLINE;
     const MusicXmlExtendedSpannerDesc& spdesc = m_pass2.getSpanner({ elementType, number });
+    // the placement direction() gives a new line (see the handling of spanner starts there)
+    const bool newLineBelow = placement().empty() ? totalY() >= 0 : placement() == u"below";
     if (type == "start") {
         if (spannerExists(starts, number, elementType)) {
             m_logger->logError(String(u"%1 with number %2 already started").arg(TConv::userName(elementType).translated()).arg(number),
@@ -5664,11 +5682,12 @@ void MusicXmlParserDirection::bracket(const String& type, const int number,
                 textLine->setBeginHookHeight(Spatium(lineEnd == "both" ? length / 20 : length / 10));
                 textLine->setPropertyFlags(Pid::BEGIN_HOOK_HEIGHT, PropertyFlags::UNSTYLED);
             }
-            if (lineEnd == "up") {
+            if (lineEnd == "up" || lineEnd == "down") {
                 textLine->setBeginHookType(HookType::HOOK_90);
-            } else if (lineEnd == "down") {
-                textLine->setBeginHookType(HookType::HOOK_90);
-                textLine->setBeginHookHeight(-1 * textLine->beginHookHeight());
+                if (hookPointsAwayFromStaff(lineEnd, newLineBelow)) {
+                    textLine->setBeginHookHeight(-1 * textLine->beginHookHeight());
+                    textLine->setPropertyFlags(Pid::BEGIN_HOOK_HEIGHT, PropertyFlags::UNSTYLED);
+                }
             } else if (lineEnd == "both") {
                 textLine->setBeginHookType(HookType::HOOK_90T);
             } else if (lineEnd == "arrow") {
@@ -5726,11 +5745,14 @@ void MusicXmlParserDirection::bracket(const String& type, const int number,
                 textLine->setEndHookHeight(Spatium(lineEnd == "both" ? length / 20 : length / 10));
                 textLine->setPropertyFlags(Pid::END_HOOK_HEIGHT, PropertyFlags::UNSTYLED);
             }
-            if (lineEnd == "up") {
+            if (lineEnd == "up" || lineEnd == "down") {
                 textLine->setEndHookType(HookType::HOOK_90);
-            } else if (lineEnd == "down") {
-                textLine->setEndHookType(HookType::HOOK_90);
-                textLine->setEndHookHeight(-1 * textLine->endHookHeight());
+                // a line that has been started keeps the placement of its start
+                const bool lineBelow = spdesc.isStarted ? textLine->placeBelow() : newLineBelow;
+                if (hookPointsAwayFromStaff(lineEnd, lineBelow)) {
+                    textLine->setEndHookHeight(-1 * textLine->endHookHeight());
+                    textLine->setPropertyFlags(Pid::END_HOOK_HEIGHT, PropertyFlags::UNSTYLED);
+                }
             } else if (lineEnd == "both") {
                 textLine->setEndHookType(HookType::HOOK_90T);
             } else if (lineEnd == "arrow") {
