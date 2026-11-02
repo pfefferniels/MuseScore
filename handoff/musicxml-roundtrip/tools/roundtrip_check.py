@@ -10,7 +10,7 @@ import argparse
 import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from fractions import Fraction
 from itertools import accumulate
 from typing import Callable, Iterator
@@ -119,7 +119,33 @@ def is_trailing(measure: ET.Element, index: int) -> bool:
                    for i, c in enumerate(children) if i > index)
 
 
-def measure_facts(part_index: int, measure_index: int, measure: ET.Element, divisions: int) -> Iterator[Fact]:
+@dataclass
+class PartState:
+    """Number of staves and print-object state of each staff, carried from measure to measure."""
+    staves: int = 1
+    printed: dict[str, bool] = field(default_factory=dict)
+
+    def update(self, attributes: ET.Element) -> None:
+        self.staves = int(text_of(attributes, "staves", str(self.staves)))
+        for details in attributes.findall("staff-details"):
+            if details.get("print-object") is not None:
+                self.printed[details.get("number", "1")] = details.get("print-object") != "no"
+
+
+def direction_staff(measure: ET.Element, direction: ET.Element, state: PartState) -> str:
+    """Staff of a direction. Text on a staff that is not printed and has no notes in the measure is drawn on the
+    nearest printed staff of the part, so it is counted there."""
+    staff = staff_of(direction)
+    has_notes = any(staff_of(n) == staff and n.find("rest") is None for n in measure.findall("note"))
+    if state.printed.get(staff, True) or has_notes:
+        return staff
+    below = range(int(staff) + 1, state.staves + 1)
+    above = range(int(staff) - 1, 0, -1)
+    return next((str(s) for s in [*below, *above] if state.printed.get(str(s), True)), staff)
+
+
+def measure_facts(part_index: int, measure_index: int, measure: ET.Element, divisions: int,
+                  state: PartState) -> Iterator[Fact]:
     def fact(category: str, staff: str, value: str, index: int = measure_index) -> Fact:
         return Fact(category, part_index, index, staff, value)
 
@@ -127,10 +153,11 @@ def measure_facts(part_index: int, measure_index: int, measure: ET.Element, divi
         if child.tag == "note" and not is_filler_rest(child):
             yield from (fact(c, staff_of(child), v) for c, v in note_facts(child, divisions))
         elif child.tag == "attributes":
+            state.update(child)
             index = measure_index + is_trailing(measure, position)
             yield from (fact(c, staff, v, index) for staff, c, v in attribute_facts(child))
         elif child.tag == "direction":
-            yield from (fact(c, staff_of(child), v) for c, v in direction_facts(child))
+            yield from (fact(c, direction_staff(measure, child, state), v) for c, v in direction_facts(child))
         elif child.tag == "figured-bass":
             figures = " ".join(f"{text_of(f, 'prefix')}{text_of(f, 'figure-number')}{text_of(f, 'suffix')}" for f in child.findall("figure"))
             yield fact("figured-bass", "1", figures)
@@ -151,12 +178,13 @@ def divisions_per_measure(measures: list[ET.Element]) -> list[int]:
 
 def facts(path: str) -> Counter:
     root = ET.parse(path).getroot()
-    return Counter(
-        f
-        for p, part in enumerate(root.findall("part"))
-        for m, (measure, divisions) in enumerate(zip(part.findall("measure"), divisions_per_measure(part.findall("measure"))))
-        for f in measure_facts(p, m, measure, divisions)
-    )
+    result: Counter = Counter()
+    for p, part in enumerate(root.findall("part")):
+        state = PartState()
+        measures = part.findall("measure")
+        for m, (measure, divisions) in enumerate(zip(measures, divisions_per_measure(measures))):
+            result.update(measure_facts(p, m, measure, divisions, state))
+    return result
 
 
 def report(before: Counter, after: Counter, details: int, out: Callable[[str], None] = print) -> bool:
