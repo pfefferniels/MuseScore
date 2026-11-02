@@ -325,6 +325,9 @@ Ret NotationProject::doImport(const muse::io::path_t& path, const OpenParams& op
         return ret;
     }
 
+    // as the mscz reader does; exporters such as MusicXML rely on it
+    score->rebuildMidiMapping();
+
     // Setup master score post-reading
     ret = m_engravingProject->setupMasterScore(openParams.forceMode);
     if (!ret) {
