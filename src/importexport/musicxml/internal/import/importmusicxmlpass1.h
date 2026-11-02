@@ -198,6 +198,8 @@ public:
     engraving::Fraction getMeasureStart(const size_t i) const;
     int octaveShift(const muse::String& id, const engraving::staff_idx_t staff, const engraving::Fraction& f) const;
     const CreditWordsList& credits() const { return m_credits; }
+    const std::set<int>& systemStartMeasureNrs() const { return m_systemStartMeasureNrs; }
+    const std::set<int>& pageStartMeasureNrs() const { return m_pageStartMeasureNrs; }
     bool hasBeamingInfo() const { return m_hasBeamingInfo; }
     bool isVocalStaff(const muse::String& partId) const { return m_parts.at(partId).isVocalStaff(); }
     bool isPercussionStaff(const muse::String& partId) const { return m_parts.at(partId).isPercussionStaff(); }

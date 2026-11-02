@@ -530,6 +530,7 @@
         </VBox>
       <Measure>
         <eid>J_J</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>PERC</concertClefType>
@@ -684,6 +685,7 @@
         </Measure>
       <Measure>
         <eid>m_m</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <LayoutBreak>
           <eid>n_n</eid>
           <subtype>line</subtype>
@@ -733,6 +735,7 @@
         </Measure>
       <Measure>
         <eid>w_w</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <voice>
           <Chord>
             <eid>x_x</eid>
@@ -872,6 +875,7 @@
         </Measure>
       <Measure>
         <eid>LB_LB</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <LayoutBreak>
           <eid>MB_MB</eid>
           <subtype>line</subtype>
@@ -925,6 +929,7 @@
         </Measure>
       <Measure>
         <eid>VB_VB</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <voice>
           <Chord>
             <eid>WB_WB</eid>
@@ -1068,6 +1073,7 @@
         </Measure>
       <Measure>
         <eid>wB_wB</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <LayoutBreak>
           <eid>xB_xB</eid>
           <subtype>line</subtype>
@@ -1121,6 +1127,7 @@
         </Measure>
       <Measure>
         <eid>6B_6B</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <voice>
           <Chord>
             <eid>7B_7B</eid>
@@ -1268,6 +1275,7 @@
         </Measure>
       <Measure>
         <eid>VC_VC</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <LayoutBreak>
           <eid>WC_WC</eid>
           <subtype>line</subtype>
@@ -1321,6 +1329,7 @@
         </Measure>
       <Measure>
         <eid>fC_fC</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <voice>
           <Chord>
             <eid>gC_gC</eid>
@@ -1468,6 +1477,7 @@
         </Measure>
       <Measure>
         <eid>6C_6C</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <LayoutBreak>
           <eid>7C_7C</eid>
           <subtype>line</subtype>
@@ -1517,6 +1527,7 @@
         </Measure>
       <Measure>
         <eid>ED_ED</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <voice>
           <Chord>
             <eid>FD_FD</eid>
@@ -1656,6 +1667,7 @@
         </Measure>
       <Measure>
         <eid>fD_fD</eid>
+        <vspacerFixed>4.351</vspacerFixed>
         <LayoutBreak>
           <eid>gD_gD</eid>
           <subtype>page</subtype>
@@ -1705,6 +1717,7 @@
         </Measure>
       <Measure>
         <eid>pD_pD</eid>
+        <vspacerFixed>9.176</vspacerFixed>
         <voice>
           <Chord>
             <eid>qD_qD</eid>
@@ -1750,6 +1763,7 @@
         </Measure>
       <Measure>
         <eid>yD_yD</eid>
+        <vspacerFixed>9.176</vspacerFixed>
         <voice>
           <Chord>
             <eid>zD_zD</eid>
@@ -1823,6 +1837,7 @@
         </Measure>
       <Measure>
         <eid>AE_AE</eid>
+        <vspacerFixed>9.176</vspacerFixed>
         <voice>
           <Rest>
             <eid>BE_BE</eid>
@@ -1893,6 +1908,7 @@
         </Measure>
       <Measure>
         <eid>OE_OE</eid>
+        <vspacerFixed>9.176</vspacerFixed>
         <LayoutBreak>
           <eid>PE_PE</eid>
           <subtype>line</subtype>
@@ -1907,6 +1923,7 @@
         </Measure>
       <Measure>
         <eid>RE_RE</eid>
+        <vspacerFixed>9.176</vspacerFixed>
         <voice>
           <Rest>
             <eid>SE_SE</eid>
@@ -1977,6 +1994,7 @@
         </Measure>
       <Measure>
         <eid>fE_fE</eid>
+        <vspacerFixed>9.176</vspacerFixed>
         <LayoutBreak>
           <eid>gE_gE</eid>
           <subtype>line</subtype>
@@ -1991,6 +2009,7 @@
         </Measure>
       <Measure>
         <eid>iE_iE</eid>
+        <vspacerFixed>9.176</vspacerFixed>
         <voice>
           <Rest>
             <eid>jE_jE</eid>
@@ -2041,6 +2060,7 @@
         </Measure>
       <Measure>
         <eid>sE_sE</eid>
+        <vspacerFixed>9.176</vspacerFixed>
         <voice>
           <Rest>
             <eid>tE_tE</eid>
@@ -2144,6 +2164,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>10.878</vspacerFixed>
         <voice>
           <Rest>
             <eid>+E_+E</eid>
@@ -2180,6 +2201,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>10.878</vspacerFixed>
         <voice>
           <Rest>
             <eid>CF_CF</eid>
@@ -2216,6 +2238,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>10.878</vspacerFixed>
         <voice>
           <Rest>
             <eid>GF_GF</eid>
@@ -2252,6 +2275,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>10.878</vspacerFixed>
         <voice>
           <Rest>
             <eid>KF_KF</eid>
@@ -2288,6 +2312,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>10.878</vspacerFixed>
         <voice>
           <Rest>
             <eid>OF_OF</eid>
@@ -2342,6 +2367,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>22.941</vspacerFixed>
         <voice>
           <Rest>
             <eid>UF_UF</eid>
@@ -2697,6 +2723,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>22.941</vspacerFixed>
         <voice>
           <Chord>
             <eid>PG_PG</eid>
@@ -3069,6 +3096,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>22.941</vspacerFixed>
         <voice>
           <Chord>
             <eid>PH_PH</eid>

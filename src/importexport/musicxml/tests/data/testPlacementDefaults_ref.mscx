@@ -207,6 +207,7 @@
         </VBox>
       <Measure>
         <eid>K_K</eid>
+        <vspacerFixed>12.945</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -332,6 +333,7 @@
         </Measure>
       <Measure>
         <eid>j_j</eid>
+        <vspacerFixed>12.945</vspacerFixed>
         <voice>
           <Chord>
             <eid>k_k</eid>

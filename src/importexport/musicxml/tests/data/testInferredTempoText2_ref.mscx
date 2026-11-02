@@ -199,6 +199,7 @@
         </VBox>
       <Measure>
         <eid>J_J</eid>
+        <vspacerFixed>8.833</vspacerFixed>
         <LayoutBreak>
           <eid>K_K</eid>
           <subtype>line</subtype>
@@ -229,6 +230,7 @@
         </Measure>
       <Measure>
         <eid>P_P</eid>
+        <vspacerFixed>8.833</vspacerFixed>
         <voice>
           <Rest>
             <eid>Q_Q</eid>
@@ -244,6 +246,7 @@
       </Staff>
     <Staff id="2">
       <Measure>
+        <vspacerFixed>22.083</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>F</concertClefType>

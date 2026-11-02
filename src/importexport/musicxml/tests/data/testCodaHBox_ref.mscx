@@ -146,6 +146,7 @@
         </VBox>
       <Measure>
         <eid>I_I</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -187,6 +188,7 @@
         </Measure>
       <Measure>
         <eid>Q_Q</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <LayoutBreak>
           <eid>R_R</eid>
           <subtype>line</subtype>
@@ -201,6 +203,7 @@
         </Measure>
       <Measure>
         <eid>T_T</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Rest>
             <eid>U_U</eid>
@@ -242,6 +245,7 @@
         </Measure>
       <Measure>
         <eid>b_b</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <LayoutBreak>
           <eid>c_c</eid>
           <subtype>line</subtype>
@@ -260,6 +264,7 @@
         </HBox>
       <Measure>
         <eid>f_f</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <Marker>
           <style>repeat_left</style>
           <eid>g_g</eid>
@@ -297,6 +302,7 @@
         </Measure>
       <Measure>
         <eid>m_m</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Rest>
             <eid>n_n</eid>
@@ -350,6 +356,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>22.25</vspacerFixed>
         <voice>
           <Rest>
             <eid>u_u</eid>
@@ -386,6 +393,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>22.25</vspacerFixed>
         <voice>
           <Rest>
             <eid>y_y</eid>

@@ -74,6 +74,7 @@
 #include "engraving/dom/rest.h"
 #include "engraving/dom/score.h"
 #include "engraving/dom/slur.h"
+#include "engraving/dom/spacer.h"
 #include "engraving/dom/staff.h"
 #include "engraving/dom/stafftext.h"
 #include "engraving/dom/tapping.h"
@@ -2122,6 +2123,8 @@ void MusicXmlParserPass2::scorePartwise()
     }
     addError(checkAtEndElement(m_e, u"score-partwise"));
 
+    addVerticalLayout();
+
     for (const auto& [_, sysEl] : m_sysElements) {
         m_score->undoAddElement(sysEl);
 
@@ -2931,23 +2934,20 @@ void MusicXmlParserPass2::measure(const String& partId, const Fraction time)
         } else if (m_e.name() == "barline") {
             barline(partId, measure, time + mTime);
         } else if (m_e.name() == "print") {
-            if (m_score->parts()[0] == m_pass1.getPart(partId)) {
-                // only process for first part
-                while (m_e.readNextStartElement()) {
-                    if (m_e.name() == "page-layout") {
-                        m_e.skipCurrentElement();            // skip but don't log
-                    } else if (m_e.name() == "system-layout") {
-                        m_e.skipCurrentElement();            // skip but don't log
-                    } else if (m_e.name() == "staff-layout") {
-                        m_e.skipCurrentElement();            // skip but don't log
-                    } else if (m_e.name() == "measure-layout") {
-                        measureLayout(measure);
-                    } else {
-                        skipLogCurrElem();
-                    }
+            // system layout and measure layout are read for the first part only, staff layout for every part
+            const bool firstPart = m_score->parts()[0] == m_pass1.getPart(partId);
+            while (m_e.readNextStartElement()) {
+                if (m_e.name() == "staff-layout") {
+                    staffLayout(partId, measure);
+                } else if (!firstPart || m_e.name() == "page-layout") {
+                    m_e.skipCurrentElement();            // skip but don't log
+                } else if (m_e.name() == "system-layout") {
+                    systemLayout(measure);
+                } else if (m_e.name() == "measure-layout") {
+                    measureLayout(measure);
+                } else {
+                    skipLogCurrElem();
                 }
-            } else {
-                m_e.skipCurrentElement();
             }
         } else {
             skipLogCurrElem();
@@ -3112,6 +3112,174 @@ void MusicXmlParserPass2::measureLayout(Measure* measure)
 }
 
 //---------------------------------------------------------
+//   systemLayout
+//---------------------------------------------------------
+
+/**
+ Parse the /score-partwise/part/measure/print/system-layout node:
+ read the distances for later handling by addVerticalLayout().
+ */
+
+void MusicXmlParserPass2::systemLayout(Measure* measure)
+{
+    PrintedSystemLayout& layout = m_systemLayouts[measure->tick()];
+    while (m_e.readNextStartElement()) {
+        if (m_e.name() == "system-distance") {
+            layout.systemDistance = m_e.readDouble();
+        } else if (m_e.name() == "top-system-distance") {
+            layout.topSystemDistance = m_e.readDouble();
+        } else {
+            m_e.skipCurrentElement();            // skip but don't log
+        }
+    }
+}
+
+//---------------------------------------------------------
+//   staffLayout
+//---------------------------------------------------------
+
+/**
+ Parse the /score-partwise/part/measure/print/staff-layout node:
+ read the distance for later handling by addVerticalLayout().
+ */
+
+void MusicXmlParserPass2::staffLayout(const String& partId, Measure* measure)
+{
+    const Part* part = m_pass1.getPart(partId);
+    const String strNumber = m_e.attribute("number");
+    const int n = m_pass1.getMusicXmlPart(partId).staffNumberToIndex(strNumber.empty() ? 1 : strNumber.toInt());
+    while (m_e.readNextStartElement()) {
+        if (m_e.name() == "staff-distance") {
+            const double distance = m_e.readDouble();
+            if (part && n >= 0 && n < int(part->nstaves())) {
+                m_systemLayouts[measure->tick()].staffDistances[m_score->staffIdx(part) + n] = distance;
+            }
+        } else {
+            m_e.skipCurrentElement();            // skip but don't log
+        }
+    }
+}
+
+//---------------------------------------------------------
+//   addSpacer
+//---------------------------------------------------------
+
+static void addSpacer(Measure* measure, const staff_idx_t staffIdx, const SpacerType type, const double tenths)
+{
+    const MStaff* mstaff = measure->mstaves()[staffIdx];
+    if (type == SpacerType::UP ? mstaff->vspacerUp() : mstaff->vspacerDown()) {
+        return;
+    }
+    Spacer* spacer = Factory::createSpacer(measure);
+    spacer->setSpacerType(type);
+    spacer->setTrack(staffIdx * VOICES);
+    measure->add(spacer);
+    // spacer gaps are in the staff's own spatium, MusicXML tenths are score-wide
+    const double staffMag = measure->score()->staff(staffIdx)->staffMag(measure->tick());
+    spacer->setGap(Spatium(std::max(0.0, tenths) / 10.0 / staffMag));
+}
+
+//---------------------------------------------------------
+//   addVerticalLayout
+//---------------------------------------------------------
+
+/**
+ Reproduce the printed distances between systems and staves with spacers, so
+ that the printed systems fit the printed pages. Only done when the printed
+ system and page breaks are imported, as the distances belong to those systems.
+ */
+
+void MusicXmlParserPass2::addVerticalLayout()
+{
+    if (!configuration()->importLayout() || !configuration()->importBreaks() || m_systemLayouts.empty()) {
+        return;
+    }
+
+    std::vector<Measure*> measures;
+    for (Measure* m = m_score->firstMeasure(); m; m = m->nextMeasure()) {
+        measures.push_back(m);
+    }
+    const std::set<int>& systemStarts = m_pass1.systemStartMeasureNrs();
+    const std::set<int>& pageStarts = m_pass1.pageStartMeasureNrs();
+
+    auto isPrinted = [this](staff_idx_t staffIdx, const Fraction& tick) {
+        if (!m_score->staff(staffIdx)->show()) {
+            return false;
+        }
+        const auto changes = m_staffPrinted.find(staffIdx);
+        if (changes == m_staffPrinted.end()) {
+            return true;
+        }
+        auto it = changes->second.upper_bound(tick);
+        return it == changes->second.begin() || std::prev(it)->second;
+    };
+
+    Measure* prevAnchor = nullptr;
+    staff_idx_t prevLastStaff = muse::nidx;
+    size_t first = 0;
+    while (first < measures.size()) {
+        size_t last = first + 1;
+        while (last < measures.size() && !muse::contains(systemStarts, int(last)) && !muse::contains(pageStarts, int(last))) {
+            ++last;
+        }
+        --last;
+
+        const Fraction tick = measures[first]->tick();
+        std::vector<staff_idx_t> printed;
+        for (staff_idx_t staffIdx = 0; staffIdx < m_score->nstaves(); ++staffIdx) {
+            if (isPrinted(staffIdx, tick)) {
+                printed.push_back(staffIdx);
+            }
+        }
+
+        // measures with notes cannot end up inside a multimeasure rest, which would drop their spacers;
+        // using the first and the last of them also covers a printed system that layout has to wrap
+        Measure* firstAnchor = measures[first];
+        for (size_t i = first; i <= last; ++i) {
+            if (!measures[i]->isEmpty(muse::nidx)) {
+                firstAnchor = measures[i];
+                break;
+            }
+        }
+        Measure* anchor = measures[last];
+        for (size_t i = last + 1; i-- > first;) {
+            if (!measures[i]->isEmpty(muse::nidx)) {
+                anchor = measures[i];
+                break;
+            }
+        }
+
+        const bool pageStart = first == 0 || muse::contains(pageStarts, int(first));
+        const auto layout = m_systemLayouts.find(tick);
+        if (layout != m_systemLayouts.end() && !printed.empty()) {
+            for (size_t i = 1; i < printed.size(); ++i) {
+                const auto distance = layout->second.staffDistances.find(printed[i]);
+                if (distance != layout->second.staffDistances.end()) {
+                    addSpacer(firstAnchor, printed[i - 1], SpacerType::FIXED, distance->second);
+                    addSpacer(anchor, printed[i - 1], SpacerType::FIXED, distance->second);
+                }
+            }
+            const std::optional<double>& systemDistance = layout->second.systemDistance;
+            if (!pageStart && systemDistance && prevAnchor && prevLastStaff != muse::nidx) {
+                addSpacer(prevAnchor, prevLastStaff, SpacerType::FIXED, *systemDistance);
+            }
+            // after a frame, layout ignores spacers
+            const std::optional<double>& topSystemDistance = layout->second.topSystemDistance;
+            const MeasureBase* prev = measures[first]->prev();
+            if (pageStart && topSystemDistance && !(prev && (prev->isVBox() || prev->isTBox() || prev->isFBox()))
+                && *topSystemDistance / 10.0 > m_score->style().styleD(Sid::staffUpperBorder)) {
+                // layout takes the distance to the first system from the up spacer of staff 0
+                addSpacer(firstAnchor, 0, SpacerType::UP, *topSystemDistance);
+            }
+        }
+
+        prevAnchor = anchor;
+        prevLastStaff = printed.empty() ? muse::nidx : printed.back();
+        first = last + 1;
+    }
+}
+
+//---------------------------------------------------------
 //   attributes
 //---------------------------------------------------------
 
@@ -3195,6 +3363,9 @@ void MusicXmlParserPass2::staffDetails(const String& partId, Measure* measure)
     StringData stringData;
     AsciiStringView visible = m_e.asciiAttribute("print-object");
     AsciiStringView spacing = m_e.asciiAttribute("print-spacing");
+    if (measure && !visible.empty()) {
+        m_staffPrinted[staffIdx][measure->tick()] = visible != "no";
+    }
     if (visible == "no") {
         // EITHER:
         //  1) this indicates an empty staff that is hidden

@@ -293,6 +293,7 @@
         </Measure>
       <Measure>
         <eid>j_j</eid>
+        <vspacerFixed>27.5</vspacerFixed>
         <LayoutBreak>
           <eid>k_k</eid>
           <subtype>line</subtype>

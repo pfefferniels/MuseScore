@@ -150,6 +150,7 @@
         </VBox>
       <Measure>
         <eid>J_J</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -274,6 +275,7 @@
         </Measure>
       <Measure>
         <eid>g_g</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Rest>
             <eid>h_h</eid>

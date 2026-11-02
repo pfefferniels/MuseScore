@@ -23,6 +23,7 @@
 #pragma once
 
 #include <array>
+#include <optional>
 
 #include "importmusicxmlpass1.h"
 #include "../shared/musicxmlsupport.h"
@@ -453,6 +454,9 @@ private:
     void part();
     void measure(const muse::String& partId, const engraving::Fraction time);
     void measureLayout(engraving::Measure* measure);
+    void systemLayout(engraving::Measure* measure);
+    void staffLayout(const muse::String& partId, engraving::Measure* measure);
+    void addVerticalLayout();
     void setMeasureRepeats(const engraving::staff_idx_t scoreRelStaff, engraving::Measure* measure);
     void attributes(const muse::String& partId, engraving::Measure* measure, const engraving::Fraction& tick);
     void measureStyle(engraving::Measure* measure);
@@ -546,6 +550,14 @@ private:
 
     SystemElements m_sysElements;
     InferredPercList m_inferredPerc;
+
+    struct PrintedSystemLayout {
+        std::optional<double> systemDistance;
+        std::optional<double> topSystemDistance;
+        std::map<engraving::staff_idx_t, double> staffDistances;   // above the staff, in tenths
+    };
+    std::map<engraving::Fraction, PrintedSystemLayout> m_systemLayouts;  // by measure tick
+    std::map<engraving::staff_idx_t, std::map<engraving::Fraction, bool> > m_staffPrinted;   // print-object changes
 };
 
 //---------------------------------------------------------

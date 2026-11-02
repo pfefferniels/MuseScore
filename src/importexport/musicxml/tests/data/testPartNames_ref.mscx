@@ -277,6 +277,7 @@
         </VBox>
       <Measure>
         <eid>N_N</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -674,6 +675,7 @@
         </Measure>
       <Measure>
         <eid>dB_dB</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Rest>
             <eid>eB_eB</eid>
@@ -689,6 +691,7 @@
       </Staff>
     <Staff id="2">
       <Measure>
+        <vspacerFixed>8.471</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>F</concertClefType>
@@ -918,6 +921,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>8.471</vspacerFixed>
         <voice>
           <Chord>
             <eid>EC_EC</eid>
@@ -946,6 +950,7 @@
       </Staff>
     <Staff id="3">
       <Measure>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -1222,6 +1227,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Chord>
             <eid>1C_1C</eid>

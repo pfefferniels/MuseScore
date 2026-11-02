@@ -31,10 +31,12 @@
 #include "engraving/dom/masterscore.h"
 #include "engraving/dom/measure.h"
 #include "engraving/dom/note.h"
+#include "engraving/dom/page.h"
 #include "engraving/dom/partialtie.h"
 #include "engraving/dom/segment.h"
 #include "engraving/dom/staff.h"
 #include "engraving/dom/stafftype.h"
+#include "engraving/dom/system.h"
 
 #include "settings.h"
 #include "importexport/musicxml/imusicxmlconfiguration.h"
@@ -72,7 +74,7 @@ class MusicXml_Tests : public ::testing::Test
 {
 public:
     void musicXmlIoTest(const char* file, bool exportLayout = false);
-    void musicXmlIoTestRef(const char* file);
+    void musicXmlIoTestRef(const char* file, bool exportLayout = false);
     void musicXmlIoTestRefBreaks(const char* file);
     void musicXmlMscxExportTestRef(const char* file, bool exportLayout = false);
     void musicXmlMscxExportTestRefBreaks(const char* file);
@@ -160,12 +162,12 @@ void MusicXml_Tests::musicXmlIoTest(const char* file, bool exportLayout)
 //   read a MusicXML file, write to a new file and verify against reference
 //---------------------------------------------------------
 
-void MusicXml_Tests::musicXmlIoTestRef(const char* file)
+void MusicXml_Tests::musicXmlIoTestRef(const char* file, bool exportLayout)
 {
     MScore::debugMode = true;
 
     setValue(PREF_EXPORT_MUSICXML_EXPORTBREAKS, Val(IMusicXmlConfiguration::MusicXmlExportBreaksType::Manual));
-    setValue(PREF_EXPORT_MUSICXML_EXPORTLAYOUT, Val(false));
+    setValue(PREF_EXPORT_MUSICXML_EXPORTLAYOUT, Val(exportLayout));
     setValue(PREF_IMPORT_MUSICXML_IMPORTBREAKS, Val(true));
     setValue(PREF_EXPORT_MUSICXML_EXPORTINVISIBLE, Val(true));
     setValue(PREF_IMPORT_MUSICXML_INFERTEXT, Val(true));
@@ -1359,7 +1361,33 @@ TEST_F(MusicXml_Tests, DISABLED_EXCEPT_ON_LINUX(systemDistance)) {
     musicXmlMscxExportTestRef("testSystemDistance", true);
 }
 TEST_F(MusicXml_Tests, DISABLED_EXCEPT_ON_LINUX(systemDividers)) {
-    musicXmlIoTest("testSystemDividers", true);
+    musicXmlIoTestRef("testSystemDividers", true);
+}
+TEST_F(MusicXml_Tests, systemDistances) {
+    musicXmlImportTestRef("testSystemDistances");
+}
+TEST_F(MusicXml_Tests, systemDistancesLayout)
+{
+    MasterScore* score = readScore(XML_IO_DATA_DIR + u"testSystemDistances.xml");
+    ASSERT_TRUE(score);
+    score->doLayout();
+
+    // the printed distances make the printed systems fit the printed pages
+    ASSERT_EQ(score->npages(), 2u);
+    const double spatium = score->style().spatium();
+    for (const Page* page : score->pages()) {
+        const std::vector<System*>& systems = page->systems();
+        for (size_t i = 1; i < systems.size(); ++i) {
+            const System* prev = systems[i - 1];
+            if (prev->vbox()) {
+                continue;
+            }
+            EXPECT_NEAR(systems[i]->y() - prev->y() - prev->height(), 4.0 * spatium, 0.05 * spatium);
+        }
+    }
+    const Page* page2 = score->pages().at(1);
+    EXPECT_NEAR(page2->systems().front()->y() - page2->tm(), 10.0 * spatium, 0.05 * spatium);
+    delete score;
 }
 TEST_F(MusicXml_Tests, systemObjectStaves) {
     musicXmlImportTestRef("testSystemObjectStaves");

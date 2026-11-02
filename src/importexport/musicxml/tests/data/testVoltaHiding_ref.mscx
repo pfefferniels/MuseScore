@@ -215,6 +215,7 @@
         </VBox>
       <Measure>
         <eid>L_L</eid>
+        <vspacerFixed>4.782</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -812,6 +813,7 @@
         </Measure>
       <Measure>
         <eid>HC_HC</eid>
+        <vspacerFixed>4.782</vspacerFixed>
         <voice>
           <Chord>
             <eid>IC_IC</eid>
@@ -846,6 +848,7 @@
       </Staff>
     <Staff id="2">
       <Measure>
+        <vspacerFixed>4.575</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -1446,6 +1449,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>4.575</vspacerFixed>
         <voice>
           <Chord>
             <eid>yD_yD</eid>

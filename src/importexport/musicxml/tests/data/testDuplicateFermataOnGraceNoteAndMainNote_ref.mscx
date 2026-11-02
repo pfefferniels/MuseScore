@@ -215,6 +215,7 @@
         </VBox>
       <Measure len="4/8">
         <eid>J_J</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>

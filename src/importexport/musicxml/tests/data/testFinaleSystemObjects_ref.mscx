@@ -583,6 +583,7 @@
         </VBox>
       <Measure>
         <eid>U_U</eid>
+        <vspacerFixed>9.608</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -614,6 +615,7 @@
         </Measure>
       <Measure>
         <eid>a_a</eid>
+        <vspacerFixed>9.608</vspacerFixed>
         <voice>
           <Rest>
             <eid>b_b</eid>
@@ -629,6 +631,7 @@
       </Staff>
     <Staff id="2">
       <Measure>
+        <vspacerFixed>11.529</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -649,6 +652,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>11.529</vspacerFixed>
         <voice>
           <Rest>
             <eid>g_g</eid>
@@ -664,6 +668,7 @@
       </Staff>
     <Staff id="3">
       <Measure>
+        <vspacerFixed>9.608</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -701,6 +706,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>9.608</vspacerFixed>
         <voice>
           <Rest>
             <eid>o_o</eid>
@@ -716,6 +722,7 @@
       </Staff>
     <Staff id="4">
       <Measure>
+        <vspacerFixed>11.529</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>F</concertClefType>
@@ -736,6 +743,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>11.529</vspacerFixed>
         <voice>
           <Rest>
             <eid>t_t</eid>
@@ -751,6 +759,7 @@
       </Staff>
     <Staff id="5">
       <Measure>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -771,6 +780,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Rest>
             <eid>y_y</eid>
@@ -786,6 +796,7 @@
       </Staff>
     <Staff id="6">
       <Measure>
+        <vspacerFixed>11.529</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>F</concertClefType>
@@ -806,6 +817,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>11.529</vspacerFixed>
         <voice>
           <Rest>
             <eid>3_3</eid>
@@ -821,6 +833,7 @@
       </Staff>
     <Staff id="7">
       <Measure>
+        <vspacerFixed>9.607</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>
@@ -853,6 +866,7 @@
           </voice>
         </Measure>
       <Measure>
+        <vspacerFixed>9.607</vspacerFixed>
         <voice>
           <Rest>
             <eid>+_+</eid>

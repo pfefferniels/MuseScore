@@ -146,6 +146,7 @@
         </VBox>
       <Measure>
         <eid>I_I</eid>
+        <vspacerFixed>6.5</vspacerFixed>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>

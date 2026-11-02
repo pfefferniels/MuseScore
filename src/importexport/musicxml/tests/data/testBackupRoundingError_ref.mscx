@@ -125,6 +125,7 @@
         </HBox>
       <Measure>
         <eid>J_J</eid>
+        <vspacerUp>22.1562</vspacerUp>
         <voice>
           <Clef>
             <concertClefType>G</concertClefType>

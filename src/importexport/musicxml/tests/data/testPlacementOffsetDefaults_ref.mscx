@@ -164,6 +164,7 @@
         </Measure>
       <Measure>
         <eid>N_N</eid>
+        <vspacerFixed>20.5</vspacerFixed>
         <LayoutBreak>
           <eid>O_O</eid>
           <subtype>line</subtype>
@@ -198,6 +199,7 @@
         </Measure>
       <Measure>
         <eid>U_U</eid>
+        <vspacerFixed>20.5</vspacerFixed>
         <LayoutBreak>
           <eid>V_V</eid>
           <subtype>line</subtype>
