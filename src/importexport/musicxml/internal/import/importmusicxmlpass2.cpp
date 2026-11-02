@@ -290,7 +290,8 @@ static int MusicXmlStepAltOct2Pitch(int step, int alter, int octave)
  Note that n's staff and track have not been set yet
  */
 
-static void xmlSetPitch(Note* n, int step, int alter, double tuning, int octave, const int octaveShift, const Instrument* const instr)
+static void xmlSetPitch(Note* n, int step, int alter, double tuning, int octave, const int octaveShift, const Instrument* const instr,
+                        const Staff* staff)
 {
     //LOGD("xmlSetPitch(n=%p, step=%d, alter=%d, octave=%d, octaveShift=%d)",
     //       n, step, alter, octave, octaveShift);
@@ -298,7 +299,7 @@ static void xmlSetPitch(Note* n, int step, int alter, double tuning, int octave,
     //const Staff* staff = n->score()->staff(track / VOICES);
     //const Instrument* instr = staff->part()->instr();
 
-    const Interval intval = instr->transpose();
+    const Interval intval = staff ? staff->transposeOverride().value_or(instr->transpose()) : instr->transpose();
 
     //LOGD("  staff=%p instr=%p dia=%d chro=%d",
     //       staff, instr, static_cast<int>(intval.diatonic), static_cast<int>(intval.chromatic));
@@ -747,6 +748,36 @@ static void setPartInstruments(MusicXmlLogger* logger, const XmlStreamReader* xm
                 }
             }
             prevInstrId = instrId;
+        }
+    }
+}
+
+//---------------------------------------------------------
+//   setStaffTranspositions
+//---------------------------------------------------------
+
+/**
+ Give a staff its own transposition where the file sets one per staff that differs from the
+ instrument's, such as a cue staff at concert pitch or a staff for a doubling instrument.
+ */
+
+static void setStaffTranspositions(Part* part, const MusicXmlPart& mxmlPart)
+{
+    const std::map<int, Interval>& staffIntervals = mxmlPart._staffIntervals;
+    if (std::none_of(staffIntervals.begin(), staffIntervals.end(), [](const auto& i) { return i.first > 0; })) {
+        return;
+    }
+    // a staff without a transposition of its own has the one for all staves, or none
+    std::vector<Interval> intervals(part->nstaves(), muse::value(staffIntervals, 0, Interval()));
+    for (const auto& [number, interval] : staffIntervals) {
+        const int index = mxmlPart.staffNumberToIndex(number);
+        if (number > 0 && index >= 0 && index < static_cast<int>(intervals.size())) {
+            intervals[index] = interval;
+        }
+    }
+    for (size_t i = 0; i < intervals.size(); ++i) {
+        if (!(intervals[i] == part->instrument()->transpose())) {
+            part->staff(i)->setTransposeOverride(intervals[i]);
         }
     }
 }
@@ -2249,6 +2280,7 @@ void MusicXmlParserPass2::part()
     MusicXmlPart mxmlPart = m_pass1.getMusicXmlPart(id);
     String partName = mxmlPart.getName();
     setPartInstruments(m_logger, &m_e, part, id, m_score, m_pass1.getInstrList(id), m_pass1.getIntervals(id), instruments, partName);
+    setStaffTranspositions(part, mxmlPart);
     partName = replacePartNameAccidentals(partName);
     const bool inconsistentVisibility = mxmlPart.getPrintName() != mxmlPart.getPrintAbbr();
     if (!isLikelyIncorrectPartName(partName)) {
@@ -6524,13 +6556,23 @@ void MusicXmlParserPass2::key(const String& partId, Measure* measure, const Frac
 
     size_t nstaves = m_pass1.getPart(partId)->nstaves();
     staff_idx_t staffIdx = m_pass1.trackForPart(partId) / VOICES;
+    // the concert key of a staff with its own transposition follows from that
+    auto keyForStaff = [this, &key](staff_idx_t idx) {
+        KeySigEvent staffKey = key;
+        const std::optional<Interval>& interval = m_score->staff(idx)->transposeOverride();
+        if (interval && !m_score->style().styleB(Sid::concertPitch) && !key.isAtonal() && !key.custom()) {
+            staffKey.setConcertKey(Transpose::transposeKey(key.key(), *interval));
+            staffKey.setKey(key.key());   // setConcertKey() also sets the written key
+        }
+        return staffKey;
+    };
     if (keyno == -1) {
         // apply key to all staves in the part
         for (staff_idx_t i = 0; i < nstaves; ++i) {
-            addKey(key, keyColor, printObject, m_score, measure, staffIdx + i, tick);
+            addKey(keyForStaff(staffIdx + i), keyColor, printObject, m_score, measure, staffIdx + i, tick);
         }
     } else if (keyno < static_cast<int>(nstaves)) {
-        addKey(key, keyColor, printObject, m_score, measure, staffIdx + keyno, tick);
+        addKey(keyForStaff(staffIdx + keyno), keyColor, printObject, m_score, measure, staffIdx + keyno, tick);
     }
 }
 
@@ -7195,7 +7237,7 @@ static void addTremolo(ChordRest* cr, const int tremoloNr, const String& tremolo
 // TODO: refactor: optimize parameters
 
 static void setPitch(Note* note, const MusicXmlInstruments& instruments, const String& instrumentId, const MusicXmlNotePitch& mnp,
-                     const int octaveShift, const Instrument* const instrument)
+                     const int octaveShift, const Instrument* const instrument, const Staff* staff)
 {
     if (mnp.unpitched()) {
         if (hasDrumset(instruments) && muse::contains(instruments, instrumentId)) {
@@ -7206,10 +7248,10 @@ static void setPitch(Note* note, const MusicXmlInstruments& instruments, const S
             note->setTpcFromPitch();
         } else {
             //LOGD("disp step %d oct %d", displayStep, displayOctave);
-            xmlSetPitch(note, mnp.displayStep(), 0, 0.0, mnp.displayOctave(), 0, instrument);
+            xmlSetPitch(note, mnp.displayStep(), 0, 0.0, mnp.displayOctave(), 0, instrument, staff);
         }
     } else {
-        xmlSetPitch(note, mnp.step(), mnp.alter(), mnp.tuning(), mnp.octave(), octaveShift, instrument);
+        xmlSetPitch(note, mnp.step(), mnp.alter(), mnp.tuning(), mnp.octave(), octaveShift, instrument, staff);
     }
 }
 
@@ -7630,7 +7672,7 @@ Note* MusicXmlParserPass2::note(const String& partId,
         if (isSingleDrumset && mnp.unpitched() && instrumentId.empty()) {
             xmlSetDrumsetPitch(note, c, st, mnp.displayStep(), mnp.displayOctave(), headGroup, stemDir, instrument);
         } else {
-            setPitch(note, instruments, instrumentId, mnp, octaveShift, instrument);
+            setPitch(note, instruments, instrumentId, mnp, octaveShift, instrument, st);
         }
         c->add(note);
         cr = c;

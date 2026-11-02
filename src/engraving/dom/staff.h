@@ -23,6 +23,7 @@
 #pragma once
 
 #include <map>
+#include <optional>
 #include <vector>
 
 #include "engravingitem.h"
@@ -31,6 +32,7 @@
 
 #include "cleflist.h"
 #include "groups.h"
+#include "interval.h"
 #include "keylist.h"
 #include "mscore.h"
 #include "stafftypelist.h"
@@ -119,6 +121,11 @@ public:
     bool stemless(const Fraction&) const;
     bool cutaway() const { return m_cutaway; }
     void setCutaway(bool val) { m_cutaway = val; }
+
+    // a staff written for another transposition than the part's instrument, such as a cue staff at concert pitch
+    const std::optional<Interval>& transposeOverride() const { return m_transposeOverride; }
+    void setTransposeOverride(const std::optional<Interval>& val) { m_transposeOverride = val; }
+    Interval instrumentTranspose(const Fraction& tick = Fraction(-1, 1)) const;
     bool showIfEntireSystemEmpty() const { return m_showIfEntireSystemEmpty; }
     void setShowIfEntireSystemEmpty(bool val) { m_showIfEntireSystemEmpty = val; }
 
@@ -277,6 +284,7 @@ private:
     int m_barLineTo = 0;                // line of end staff to draw the bar line to (0= staff bottom line, ...)
 
     bool m_cutaway = false;
+    std::optional<Interval> m_transposeOverride;
     bool m_showIfEntireSystemEmpty = false;             // show this staff if system is empty and hideEmptyStaves is true
     bool m_hideSystemBarLine = false;       // no system barline if not preceded by staff with barline
     AutoOnOff m_mergeMatchingRests = AutoOnOff::AUTO;      // merge matching rests in multiple voices

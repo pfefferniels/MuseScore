@@ -2906,7 +2906,7 @@ void TWrite::write(const Staff* item, XmlWriter& xml, WriteContext& ctx)
 
     // for copy/paste we need to know the actual transposition
     if (ctx.clipboardmode()) {
-        Interval v = item->part()->instrument()->transpose();     // TODO: tick?
+        Interval v = item->transposeOverride().value_or(item->part()->instrument()->transpose());     // TODO: tick?
         if (v.diatonic) {
             xml.tag("transposeDiatonic", v.diatonic);
         }
@@ -2931,6 +2931,9 @@ void TWrite::write(const Staff* item, XmlWriter& xml, WriteContext& ctx)
     }
     if (item->cutaway()) {
         xml.tag("cutaway", item->cutaway());
+    }
+    if (const std::optional<Interval>& v = item->transposeOverride()) {
+        xml.tag("transposeOverride", { { "diatonic", v->diatonic }, { "chromatic", v->chromatic } });
     }
     if (item->showIfEntireSystemEmpty()) {
         xml.tag("showIfSystemEmpty", item->showIfEntireSystemEmpty());

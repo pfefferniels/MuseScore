@@ -809,7 +809,7 @@ static void noteValToEffectivePitchAndTpc(const NoteVal& nval, const Staff* staf
     if (concertPitch) {
         epitch = nval.pitch;
     } else {
-        const int pitchOffset = staff->originPart(tick)->instrument(tick)->transpose().chromatic;
+        const int pitchOffset = staff->instrumentTranspose(tick).chromatic;
         epitch = nval.pitch - pitchOffset;
     }
 

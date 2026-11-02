@@ -4111,6 +4111,9 @@ bool TRead::readProperties(Staff* s, XmlReader& e, ReadContext& ctx)
         s->setHideWhenEmpty(TConv::fromXml(e.readAsciiText(), AutoOnOff::AUTO));
     } else if (tag == "cutaway") {
         s->setCutaway(e.readInt());
+    } else if (tag == "transposeOverride") {
+        s->setTransposeOverride(Interval(e.intAttribute("diatonic"), e.intAttribute("chromatic")));
+        e.readNext();
     } else if (tag == "showIfSystemEmpty") {
         s->setShowIfEntireSystemEmpty(e.readInt());
     } else if (tag == "hideSystemBarLine") {

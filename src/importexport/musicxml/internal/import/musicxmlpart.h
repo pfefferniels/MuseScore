@@ -46,6 +46,7 @@ public:
     size_t nMeasures() const { return m_measureDurations.size(); }
     MusicXmlInstrList _instrList;   // TODO: make private
     MusicXmlIntervalList _intervals;                       ///< Transpositions
+    std::map<int, engraving::Interval> _staffIntervals;   ///< Transposition at the start per staff number, 0 for all staves
     engraving::Interval interval(const engraving::Fraction f) const;
     int octaveShift(const engraving::staff_idx_t staff, const engraving::Fraction f) const;
     void addOctaveShift(const engraving::staff_idx_t staff, const int shift, const engraving::Fraction f);

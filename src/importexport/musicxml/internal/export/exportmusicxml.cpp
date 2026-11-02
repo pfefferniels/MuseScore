@@ -368,7 +368,7 @@ public:
     double getTenthsFromDots(double) const;
     Fraction tick() const { return m_tick; }
     void writeInstrumentChange(const InstrumentChange* instrChange);
-    void writeInstrumentDetails(const Instrument* instrument, const bool concertPitch);
+    void writeInstrumentDetails(const Part* part, const Instrument* instrument, const bool concertPitch);
 
     static bool canWrite(const EngravingItem* e);
 
@@ -1655,7 +1655,7 @@ static void pitch2xml(const Note* note, String& s, int& alter, int& octave)
     const Staff* st = note->staff();
     const Fraction tick = note->tick();
     const Instrument* instr = st->part()->instrument(tick);
-    const Interval intval = note->concertPitch() ? 0 : instr->transpose();
+    const Interval intval = note->concertPitch() ? 0 : st->transposeOverride().value_or(instr->transpose());
 
     s      = tpc2stepName(note->tpc());
     alter  = tpc2alterByKey(note->tpc(), Key::C);
@@ -7206,8 +7206,16 @@ void ExportMusicXml::keysigTimesig(const Measure* m, const Part* p)
             keysig(keysigs.at(0), p->staff(0)->clef(m->tick()), 0);
         } else {
             // staff-specific keysigs
-            for (const auto& [st, ks] : keysigs) {
-                keysig(ks, p->staff(st)->clef(m->tick()), st + 1);
+            for (staff_idx_t st = 0; st < nstaves; ++st) {
+                if (muse::contains(keysigs, st)) {
+                    keysig(keysigs.at(st), p->staff(st)->clef(m->tick()), st + 1);
+                } else if (m->tick().isZero()) {
+                    // a staff without key signature at the start has the key in effect, usually C, write it too
+                    KeySig* ks = Factory::createKeySig(m_score->dummy());
+                    ks->setKeySigEvent(p->staff(st)->keySigEvent(m->tick()));
+                    keysig(ks, p->staff(st)->clef(m->tick()), st + 1);
+                    delete ks;
+                }
             }
         }
     } else {
@@ -8293,7 +8301,7 @@ void ExportMusicXml::writeInstrumentChange(const InstrumentChange* instrChange)
     }
     m_xml.endElement();
 
-    writeInstrumentDetails(instr, m_score->style().styleB(Sid::concertPitch));
+    writeInstrumentDetails(part, instr, m_score->style().styleB(Sid::concertPitch));
 
     m_xml.startElement("sound");
     if (!instr->musicXmlId().empty()) {
@@ -8314,19 +8322,42 @@ void ExportMusicXml::writeInstrumentChange(const InstrumentChange* instrChange)
  Write the instrument details for \a instrument.
  */
 
-void ExportMusicXml::writeInstrumentDetails(const Instrument* instrument, const bool concertPitch)
+void ExportMusicXml::writeInstrumentDetails(const Part* part, const Instrument* instrument, const bool concertPitch)
 {
-    if (instrument->transpose().chromatic) {
-        m_attr.doAttr(m_xml, true);
+    // a staff written for another transposition than the instrument's, such as a cue staff, needs one per staff
+    const bool perStaff = std::any_of(part->staves().begin(), part->staves().end(), [](const Staff* staff) {
+        return staff->transposeOverride().has_value();
+    });
+    std::vector<std::pair<size_t, Interval> > transpositions;   // staff number, or 0 for all staves
+    if (perStaff) {
+        for (size_t i = 0; i < part->nstaves(); ++i) {
+            transpositions.push_back({ i + 1, part->staff(i)->transposeOverride().value_or(instrument->transpose()) });
+        }
+    } else {
+        transpositions.push_back({ 0, instrument->transpose() });
+    }
+    if (std::none_of(transpositions.begin(), transpositions.end(), [](const auto& t) { return t.second.chromatic != 0; })) {
+        return;
+    }
+
+    m_attr.doAttr(m_xml, true);
+    for (const auto& [number, interval] : transpositions) {
+        XmlWriter::Attributes attrs;
+        if (number) {
+            attrs = { { "number", number } };
+        }
         if (concertPitch) {
-            m_xml.startElement("for-part");
+            if (!interval.chromatic) {
+                continue;
+            }
+            m_xml.startElement("for-part", attrs);
             m_xml.startElement("part-transpose");
         } else {
-            m_xml.startElement("transpose");
+            m_xml.startElement("transpose", attrs);
         }
-        m_xml.tag("diatonic",  instrument->transpose().diatonic % 7);
-        m_xml.tag("chromatic", instrument->transpose().chromatic % 12);
-        const int octaveChange = instrument->transpose().chromatic / 12;
+        m_xml.tag("diatonic",  interval.diatonic % 7);
+        m_xml.tag("chromatic", interval.chromatic % 12);
+        const int octaveChange = interval.chromatic / 12;
         if (octaveChange) {
             m_xml.tag("octave-change", octaveChange);
         }
@@ -8334,8 +8365,8 @@ void ExportMusicXml::writeInstrumentDetails(const Instrument* instrument, const 
         if (concertPitch) {
             m_xml.endElement();
         }
-        m_attr.doAttr(m_xml, false);
     }
+    m_attr.doAttr(m_xml, false);
 }
 
 //---------------------------------------------------------
@@ -8806,7 +8837,7 @@ void ExportMusicXml::writeMeasure(const Measure* const m,
     // output attributes with the first actual measure (pickup or regular) only
     if (isFirstActualMeasure) {
         writeStaffDetails(m_xml, part, m_hiddenStaves);
-        writeInstrumentDetails(part->instrument(), m_score->style().styleB(Sid::concertPitch));
+        writeInstrumentDetails(part, part->instrument(), m_score->style().styleB(Sid::concertPitch));
     } else if (mpc.systemStart) {
         // print-object holds until changed, so write it where a staff is hidden or shown again
         for (size_t staffIdx = 0; staffIdx < staves; ++staffIdx) {

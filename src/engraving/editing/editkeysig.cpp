@@ -105,7 +105,7 @@ void EditKeySig::undoChangeKeySig(Transaction& tx, Score* score, Staff* ostaff, 
         track_idx_t track    = staffIdx * VOICES;
         KeySig* ks   = toKeySig(s->element(track));
 
-        Interval interval = staff->part()->instrument(tick)->transpose();
+        Interval interval = staff->transposeOverride().value_or(staff->part()->instrument(tick)->transpose());
         Interval oldStaffInterval = staff->transpose(tick);
         KeySigEvent nkey  = key;
         bool concertPitch = staffScore->style().styleB(Sid::concertPitch);

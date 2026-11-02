@@ -2369,7 +2369,7 @@ void Score::adjustKeySigs(track_idx_t sidx, track_idx_t eidx, KeyList km)
                 continue;
             }
             KeySigEvent key = i->second;
-            Interval v = staff->part()->instrument(tick)->transpose();
+            Interval v = staff->transposeOverride().value_or(staff->part()->instrument(tick)->transpose());
             if (!v.isZero() && !style().styleB(Sid::concertPitch) && !key.isAtonal()) {
                 v.flip();
                 key.setKey(Transpose::transposeKey(key.concertKey(), v, staff->part()->preferSharpFlat()));
@@ -2619,7 +2619,7 @@ void Score::cmdConcertPitchChanged(bool flag)
             continue;
         }
         // if this staff has no transposition, and no instrument changes, we can skip it
-        Interval interval = staff->part()->instrument()->transpose(); //tick?
+        Interval interval = staff->transposeOverride().value_or(staff->part()->instrument()->transpose()); //tick?
         if (interval.isZero() && staff->part()->instruments().size() == 1) {
             continue;
         }

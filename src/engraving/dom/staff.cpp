@@ -671,12 +671,20 @@ void Staff::clearTimeSig()
 //    (taking key into account)
 //---------------------------------------------------------
 
+Interval Staff::instrumentTranspose(const Fraction& tick) const
+{
+    if (m_transposeOverride) {
+        return *m_transposeOverride;
+    }
+    return originPart(tick)->instrument(tick)->transpose();
+}
+
 Interval Staff::transpose(const Fraction& tick) const
 {
     // get real transposition
 
     const Part* p = originPart(tick);
-    Interval v = p->instrument(tick)->transpose();
+    Interval v = instrumentTranspose(tick);
     if (v.isZero()) {
         return v;
     }
@@ -1188,6 +1196,7 @@ void Staff::init(const Staff* s)
     m_barLineTo         = s->m_barLineTo;
     m_hideWhenEmpty     = s->m_hideWhenEmpty;
     m_cutaway           = s->m_cutaway;
+    m_transposeOverride = s->m_transposeOverride;
     m_showIfEntireSystemEmpty = s->m_showIfEntireSystemEmpty;
     m_hideSystemBarLine = s->m_hideSystemBarLine;
     m_mergeMatchingRests = s->m_mergeMatchingRests;

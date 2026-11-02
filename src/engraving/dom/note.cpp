@@ -866,7 +866,7 @@ int Note::tpc2default(int p) const
         Fraction tick = chord()->tick();
         key = staff()->key(tick);
         if (concertPitch()) {
-            Interval interval = originPart()->instrument(tick)->transpose();
+            Interval interval = staff()->instrumentTranspose(tick);
             if (!interval.isZero()) {
                 interval.flip();
                 key = Transpose::transposeKey(key, interval);
@@ -1723,6 +1723,9 @@ void Note::setupAfterRead(const Fraction& ctxTick, bool pasteMode)
 int Note::transposition() const
 {
     Fraction tick = chord() ? chord()->tick() : Fraction(-1, 1);
+    if (staff() && staff()->transposeOverride()) {
+        return staff()->transposeOverride()->chromatic;
+    }
     Part* origin = originPart();
     return origin ? origin->instrument(tick)->transpose().chromatic : 0;
 }

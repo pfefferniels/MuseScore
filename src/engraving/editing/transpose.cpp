@@ -330,7 +330,7 @@ void Transpose::transposeKeys(Transaction& tx, Score* score, staff_idx_t staffSt
                 continue;
             }
             if (!ks->isAtonal()) {
-                Interval v = st->part()->instrument(s->tick())->transpose();
+                Interval v = st->transposeOverride().value_or(st->part()->instrument(s->tick())->transpose());
                 KeySigEvent ke = st->keySigEvent(s->tick());
                 PreferSharpFlat pref = ks->part()->preferSharpFlat();
                 Key nKey = ke.concertKey();
@@ -351,7 +351,7 @@ void Transpose::transposeKeys(Transaction& tx, Score* score, staff_idx_t staffSt
             seg->setHeader(true);
             KeySig* ks = Factory::createKeySig(seg);
             ks->setTrack(staffIdx * VOICES);
-            Interval v = ks->part()->instrument()->transpose();
+            Interval v = ks->staff()->transposeOverride().value_or(ks->part()->instrument()->transpose());
             Key cKey = Key::C;
             Key nKey = cKey;
             if (flip) {
@@ -556,7 +556,7 @@ void Transpose::transposeHarmony(Transaction& tx, Harmony* harmony, Score* score
     // but even if it were right staff, this may differ each tick (actual key signature)
     // we can  add something like "concert pitch rootTpc" to harmony definition, or ...
     Interval kv = harmony->staff()->transpose(harmony->tick());
-    Interval iv = harmony->part()->instrument(harmony->tick())->transpose();
+    Interval iv = harmony->staff()->transposeOverride().value_or(harmony->part()->instrument(harmony->tick())->transpose());
     Interval hInterval((interval.diatonic - kv.diatonic + iv.diatonic), (interval.chromatic - kv.chromatic + iv.chromatic));
 
     // undoTransposeHarmony does not do links

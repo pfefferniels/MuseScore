@@ -1227,6 +1227,44 @@ TEST_F(MusicXml_Tests, pedalChanges) {
 TEST_F(MusicXml_Tests, pedalChangesBroken) {
     musicXmlImportTestRef("testPedalChangesBroken");
 }
+TEST_F(MusicXml_Tests, perStaffTranspose1) {
+    musicXmlImportTestRef("testPerStaffTranspose");
+}
+TEST_F(MusicXml_Tests, perStaffTranspose2) {
+    musicXmlIoTestRef("testPerStaffTranspose");
+}
+TEST_F(MusicXml_Tests, perStaffTranspose3) {
+    // the transposition of each staff (F, A, none) is read back from mscx and used for sounding pitch and concert pitch
+    MasterScore* score = readScore(XML_IO_DATA_DIR + u"testPerStaffTranspose_ref.mscx");
+    ASSERT_TRUE(score);
+    EXPECT_FALSE(score->staff(0)->transposeOverride().has_value());
+    ASSERT_TRUE(score->staff(1)->transposeOverride().has_value());
+    EXPECT_EQ(*score->staff(1)->transposeOverride(), Interval(-2, -3));
+    ASSERT_TRUE(score->staff(2)->transposeOverride().has_value());
+    EXPECT_TRUE(score->staff(2)->transposeOverride()->isZero());
+
+    const Measure* m1 = score->firstMeasure();
+    const Measure* m2 = m1->nextMeasure();
+    const Segment* seg1 = m1->first(SegmentType::ChordRest);
+    const Segment* seg2 = m2->first(SegmentType::ChordRest);
+    for (staff_idx_t staff = 0; staff < 3; ++staff) {
+        ASSERT_TRUE(seg1->element(staff * VOICES) && seg2->element(staff * VOICES));
+        EXPECT_EQ(toChord(seg1->element(staff * VOICES))->upNote()->pitch(), 72) << "staff " << staff;
+        EXPECT_EQ(toChord(seg2->element(staff * VOICES))->upNote()->pitch(), 66) << "staff " << staff;
+    }
+    EXPECT_EQ(score->staff(0)->key(m1->tick()), Key::G);
+    EXPECT_EQ(score->staff(1)->key(m1->tick()), Key::E_B);
+    EXPECT_EQ(score->staff(2)->key(m1->tick()), Key::C);
+
+    score->cmdConcertPitchChanged(true);
+    for (staff_idx_t staff = 0; staff < 3; ++staff) {
+        EXPECT_EQ(score->staff(staff)->key(m1->tick()), Key::C) << "staff " << staff;
+        EXPECT_EQ(score->staff(staff)->key(m2->tick()), Key::G) << "staff " << staff;
+    }
+    EXPECT_EQ(toChord(seg2->element(2 * VOICES))->upNote()->tpc(), Tpc::TPC_F_S);
+
+    delete score;
+}
 TEST_F(MusicXml_Tests, pedalStyles) {
     musicXmlIoTest("testPedalStyles");
 }

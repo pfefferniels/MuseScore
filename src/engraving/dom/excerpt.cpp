@@ -425,7 +425,7 @@ void Excerpt::createExcerpt(Excerpt* excerpt)
             }
 
             // if this staff has no transposition, and no instrument changes, we can skip it
-            Interval interval = staff->part()->instrument()->transpose(); //tick?
+            Interval interval = staff->transposeOverride().value_or(staff->part()->instrument()->transpose()); //tick?
             if (interval.isZero() && staff->part()->instruments().size() == 1) {
                 continue;
             }
@@ -1768,7 +1768,7 @@ void Excerpt::cloneStaff2(Staff* srcStaff, Staff* dstStaff, const Fraction& star
     }
 
     if (needsTransposition) {
-        Interval interval = srcStaff->part()->instrument()->transpose();
+        Interval interval = srcStaff->transposeOverride().value_or(srcStaff->part()->instrument()->transpose());
         if (!interval.isZero() || srcStaff->part()->instruments().size() != 1) {
             if (!scoreConcertPitch) {
                 interval.flip();

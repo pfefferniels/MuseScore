@@ -3132,6 +3132,7 @@ void MusicXmlParserPass1::time(const Fraction cTime)
 
 void MusicXmlParserPass1::transpose(const String& partId, const Fraction& tick)
 {
+    const String strNumber = m_e.attribute("number");
     Interval interval;
     while (m_e.readNextStartElement()) {
         int i = m_e.readInt();
@@ -3147,11 +3148,17 @@ void MusicXmlParserPass1::transpose(const String& partId, const Fraction& tick)
         }
     }
 
-    if (m_parts[partId]._intervals.count(tick) == 0) {
-        if (!interval.diatonic && interval.chromatic) {
-            interval.diatonic = Interval::chromatic2diatonic(interval.chromatic);
-        }
-        m_parts[partId]._intervals[tick] = interval;
+    if (!interval.diatonic && interval.chromatic) {
+        interval.diatonic = Interval::chromatic2diatonic(interval.chromatic);
+    }
+    MusicXmlPart& part = m_parts[partId];
+    // a staff keeps the transposition it has at the start
+    const int staffNumber = strNumber.empty() ? 0 : strNumber.toInt();
+    if (tick.isZero() && !muse::contains(part._staffIntervals, staffNumber)) {
+        part._staffIntervals[staffNumber] = interval;
+    }
+    if (part._intervals.count(tick) == 0) {
+        part._intervals[tick] = interval;
     } else {
         LOGD("duplicate transpose at tick %s", muPrintable(tick.toString()));
     }
