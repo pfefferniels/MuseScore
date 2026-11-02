@@ -2045,7 +2045,13 @@ void ExportMusicXml::barlineRight(const Measure* const m, const track_idx_t stra
     const Measure* mmR1 = m->coveringMMRestOrThis();   // the multi measure rest this measure is covered by
     const Measure* mmRLst = mmR1->isMMRest() ? mmR1->mmRestLast() : 0;   // last measure of replaced sequence of empty measures
     // note: use barlinetype as found in multi measure rest for last measure of replaced sequence
-    BarLineType bst = m == mmRLst ? mmR1->endBarLineType() : m->endBarLineType();
+    const Measure* blMeasure = m == mmRLst ? mmR1 : m;
+    BarLineType bst = blMeasure->endBarLineType();
+    // layout makes a generated barline double before a courtesy key or time signature, by style, not by content
+    const BarLine* generatedBl = blMeasure->endBarLine();
+    if (bst == BarLineType::DOUBLE && generatedBl && generatedBl->generated()) {
+        bst = BarLineType::NORMAL;
+    }
     const bool visible = m->endBarLineVisible();
     String color;
 

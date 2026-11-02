@@ -848,9 +848,6 @@
         <voice>1</voice>
         <type>half</type>
         </note>
-      <barline location="right">
-        <bar-style>light-light</bar-style>
-        </barline>
       </measure>
     <measure number="16">
       <print new-system="yes"/>

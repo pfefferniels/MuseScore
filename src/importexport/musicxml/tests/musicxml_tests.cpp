@@ -540,6 +540,10 @@ TEST_F(MusicXml_Tests, completeMeasureRests) {
 TEST_F(MusicXml_Tests, copyrightScale) {
     musicXmlImportTestRef("testCopyrightScale");
 }
+TEST_F(MusicXml_Tests, courtesyKeyBarline) {
+    // the double barline that layout draws before a courtesy key signature is not exported
+    musicXmlIoTestRef("testCourtesyKeyBarline");
+}
 TEST_F(MusicXml_Tests, courtesyAccidentals) {
     musicXmlImportTestRef("testCourtesyAccidentals");
 }
