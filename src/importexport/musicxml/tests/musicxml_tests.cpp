@@ -1341,6 +1341,12 @@ TEST_F(MusicXml_Tests, playtech) {
 TEST_F(MusicXml_Tests, polychord) {
     musicXmlIoTest("testPolychords");
 }
+TEST_F(MusicXml_Tests, printedEmptyStaff1) {
+    musicXmlImportTestRef("testPrintedEmptyStaff");
+}
+TEST_F(MusicXml_Tests, printedEmptyStaff2) {
+    musicXmlIoTestRef("testPrintedEmptyStaff");
+}
 TEST_F(MusicXml_Tests, printSpacingNo) {
     musicXmlIoTestRef("testPrintSpacingNo");
 }

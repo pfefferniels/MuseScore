@@ -464,6 +464,7 @@ private:
     void showAccidentalsIfDeclarationUnreliable();
     void moveTextFromHiddenStaves();
     void lockPrintedSystems();
+    void showPrintedEmptyStaves();
     void setMeasureRepeats(const engraving::staff_idx_t scoreRelStaff, engraving::Measure* measure);
     void attributes(const muse::String& partId, engraving::Measure* measure, const engraving::Fraction& tick);
     void measureStyle(engraving::Measure* measure);

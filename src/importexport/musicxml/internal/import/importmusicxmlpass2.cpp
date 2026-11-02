@@ -2191,6 +2191,7 @@ void MusicXmlParserPass2::scorePartwise()
     moveTextFromHiddenStaves();
     addVerticalLayout();
     lockPrintedSystems();
+    showPrintedEmptyStaves();
 
     for (const auto& [_, sysEl] : m_sysElements) {
         m_score->undoAddElement(sysEl);
@@ -3412,6 +3413,61 @@ void MusicXmlParserPass2::lockPrintedSystems()
         --last;
         if (last > first) {
             m_score->addSystemLock(new RangeLock(measures[first], measures[last]));
+        }
+        first = last + 1;
+    }
+}
+
+//---------------------------------------------------------
+//   showPrintedEmptyStaves
+//---------------------------------------------------------
+
+/**
+ A staff that is not printed somewhere hides when empty, and layout decides by
+ emptiness in each system. Where the print shows such a staff empty in a whole
+ system, keep it shown in that system. Done for the printed systems that
+ lockPrintedSystems() keeps together.
+ */
+
+void MusicXmlParserPass2::showPrintedEmptyStaves()
+{
+    if (m_staffPrinted.empty() || !configuration()->importLayout() || !configuration()->importBreaks()
+        || !m_pass1.hasAllSystemBreaks()) {
+        return;
+    }
+
+    std::vector<Measure*> measures;
+    for (Measure* m = m_score->firstMeasure(); m; m = m->nextMeasure()) {
+        measures.push_back(m);
+    }
+    const std::set<int>& systemStarts = m_pass1.systemStartMeasureNrs();
+    const std::set<int>& pageStarts = m_pass1.pageStartMeasureNrs();
+
+    size_t first = 0;
+    while (first < measures.size()) {
+        size_t last = first + 1;
+        while (last < measures.size() && !muse::contains(systemStarts, int(last)) && !muse::contains(pageStarts, int(last))) {
+            ++last;
+        }
+        --last;
+        for (staff_idx_t staffIdx = 0; staffIdx < m_score->nstaves(); ++staffIdx) {
+            const Staff* staff = m_score->staff(staffIdx);
+            const Part* part = staff->part();
+            const bool mayHide = staff->hideWhenEmpty() == AutoOnOff::ON
+                                 || (staff->hideWhenEmpty() == AutoOnOff::AUTO && part->hideWhenEmpty() != AutoOnOff::OFF
+                                     && (part->hideWhenEmpty() == AutoOnOff::ON || m_score->style().styleB(Sid::hideEmptyStaves)));
+            if (!staff->show() || !mayHide || !isStaffPrinted(staffIdx, measures[first]->tick())) {
+                continue;
+            }
+            bool empty = true;
+            for (size_t i = first; i <= last && empty; ++i) {
+                empty = measures[i]->isEmpty(staffIdx);
+            }
+            if (empty) {
+                for (size_t i = first; i <= last; ++i) {
+                    measures[i]->setHideStaffIfEmpty(staffIdx, AutoOnOff::OFF);
+                }
+            }
         }
         first = last + 1;
     }
