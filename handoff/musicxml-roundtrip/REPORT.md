@@ -19,8 +19,9 @@ fix commits touch only `src/` and `fonts/` and can be cherry-picked without the 
 | 9 | Printed vertical layout ignored | fixed: all 12 parts have the printed systems and page count | `3f4ac40e`, `c20c6b6f` |
 | 10 | Exit crash after conversion | not reproduced on Linux | none |
 | – | Converter crashed on every MusicXML export on this branch | fixed (prerequisite) | `f75a44e9` |
+| – | Clef change at the end of a bar drawn after the barline (asked for after the first report) | fixed | `8a698c0f`, `3f4853fc` |
 
-`musicxml_tests`: 364 tests before, 383 after, all passing at every commit. `engraving_tests` (900 tests) also pass
+`musicxml_tests`: 364 tests before, 386 after, all passing at every commit. `engraving_tests` (900 tests) also pass
 after the engraving change in `d364e083`.
 
 ## Build and environment
@@ -73,7 +74,8 @@ All conversions exited with code 0.
 ### Checker, lost/gained per category
 
 `run_roundtrip.py --no-render` over the 12 parts. Cells are lost/gained, empty where the category does not occur in
-the part. Dynamics are 0/0 in both runs and left out. Tied is left out of the final table because it is 0/0 in every
+the part. Both tables use the checker as updated in `6ec431d8` (see "Clef changes at the end of a bar"); the baseline
+outputs were checked again with it. Dynamics are 0/0 in both runs and left out. Tied is left out of the final table because it is 0/0 in every
 part (the lone tie stops of defect 7), and break because it is 0/0 in every part (every printed system and page
 break comes back).
 
@@ -83,10 +85,10 @@ Baseline:
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | bc | 265/245 | 21/1 | 2/7 | 8/6 | 2/2 | 94/31 | 20/21 | 68/449 | 3/0 |  | 5/5 |
 | fl1 | 80/78 | 0/1 | 0/1 | 28/17 | 1/0 | 42/10 | 550/551 |  | 0/0 |  | 8/5 |
-| fl2 | 72/71 | 0/1 | 0/2 | 26/15 | 1/0 | 34/7 | 555/558 |  | 0/0 |  | 8/5 |
+| fl2 | 72/71 | 0/1 | 0/2 | 27/16 | 1/0 | 34/7 | 555/558 |  | 0/0 |  | 8/5 |
 | gamba | 43/40 | 2/2 | 0/1 | 2/0 | 0/0 | 229/46 | 45/45 | 7/30 | 0/0 |  | 3/3 |
 | liuto | 13/11 | 2/0 | 0/1 | 1/0 | 0/0 | 12/6 | 18/116 | 3/0 | 0/0 |  | 2/2 |
-| ob1 | 82/78 | 2/2 | 1/1 | 25/15 | 3/3 | 6/3 | 558/560 | 6/36 | 1/0 | 2/1 | 11/7 |
+| ob1 | 82/78 | 2/2 | 1/1 | 25/15 | 2/2 | 6/3 | 558/560 | 6/36 | 1/0 | 2/1 | 11/7 |
 | ob2 | 105/102 | 4/3 | 2/7 | 30/16 | 3/4 | 4/2 | 547/550 | 10/0 | 1/0 | 2/1 | 11/7 |
 | va | 89/89 | 0/2 | 6/14 | 42/25 | 2/0 | 0/0 | 644/644 |  | 2/0 |  | 6/4 |
 | vadam1 | 32/27 | 1/0 | 0/1 | 1/0 | 0/0 | 120/42 | 18/17 | 2/0 | 0/0 |  | 1/1 |
@@ -98,18 +100,18 @@ Final:
 
 | part | accidental | barline | clef | key | lyric | note | staff-details | transpose | words |
 |---|---|---|---|---|---|---|---|---|---|
-| bc | 0/1 | 21/1 | 8/6 | 2/2 | 4/5 | 8/9 | 0/0 |  | 5/5 |
-| fl1 | 0/0 | 0/1 | 19/8 | 1/0 | 30/9 | 2/3 |  |  | 8/5 |
-| fl2 | 0/0 | 0/1 | 18/7 | 1/0 | 28/5 | 2/5 |  |  | 8/5 |
-| gamba | 0/0 | 2/2 | 2/0 | 0/0 | 0/0 | 2/2 | 1/1 |  | 3/3 |
-| liuto | 0/0 | 2/0 | 1/0 | 0/0 | 0/0 | 0/99 | 0/0 |  | 2/2 |
-| ob1 | 0/1 | 2/2 | 18/8 | 3/3 | 2/1 | 6/8 | 0/0 | 2/1 | 11/7 |
-| ob2 | 0/1 | 4/3 | 24/10 | 3/4 | 2/1 | 5/8 | 0/0 | 2/1 | 11/7 |
-| va | 0/2 | 0/2 | 29/12 | 2/0 | 0/0 | 5/5 |  |  | 6/4 |
-| vadam1 | 0/0 | 1/0 | 1/0 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
-| vadam2 | 0/0 | 1/0 | 2/1 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
-| vn1 | 0/0 | 1/1 | 26/12 | 1/0 | 0/0 | 4/4 | 0/4 |  | 8/6 |
-| vn2 | 0/0 | 1/2 | 27/12 | 2/0 | 0/0 | 1/1 | 0/0 |  | 10/7 |
+| bc | 0/1 | 21/1 | 2/0 | 2/2 | 4/5 | 8/9 | 0/0 |  | 5/5 |
+| fl1 | 0/0 | 0/1 | 0/0 | 1/0 | 30/9 | 2/3 |  |  | 8/5 |
+| fl2 | 0/0 | 0/1 | 1/1 | 1/0 | 28/5 | 2/5 |  |  | 8/5 |
+| gamba | 0/0 | 2/2 | 0/0 | 0/0 | 0/0 | 2/2 | 1/1 |  | 3/3 |
+| liuto | 0/0 | 2/0 | 0/0 | 0/0 | 0/0 | 0/99 | 0/0 |  | 2/2 |
+| ob1 | 0/1 | 2/2 | 0/0 | 2/2 | 2/1 | 6/8 | 0/0 | 2/1 | 11/7 |
+| ob2 | 0/1 | 4/3 | 2/0 | 3/4 | 2/1 | 5/8 | 0/0 | 2/1 | 11/7 |
+| va | 0/2 | 0/2 | 0/0 | 2/0 | 0/0 | 5/5 |  |  | 6/4 |
+| vadam1 | 0/0 | 1/0 | 0/0 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
+| vadam2 | 0/0 | 1/0 | 0/0 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
+| vn1 | 0/0 | 1/1 | 0/0 | 1/0 | 0/0 | 4/4 | 0/4 |  | 8/6 |
+| vn2 | 0/0 | 1/2 | 0/0 | 2/0 | 0/0 | 1/1 | 0/0 |  | 10/7 |
 
 For gamba, the brief's 4.7.4 numbers were accidental 43/40, lyric 229/46, note 45/45, staff-details 8/31, break 1/2,
 words 3/4, barline 2/2. The baseline here matches them closely. The final gamba differences are listed under the
@@ -124,8 +126,8 @@ defects below.
 | 01-lyric-extend | lyric 8/3 | equal |
 | 02-staff-size-cue | note 5/5, staff-details 1/0 | equal |
 | 03-accidentals | accidental 5/2 | equal |
-| 04-clef-in-multirest | clef 1/1, note 4/4 | clef 1/1 |
-| 04b-clef-in-multirest-range | clef 1/1, note 4/4 | clef 1/1 |
+| 04-clef-in-multirest | clef 1/1, note 4/4 | equal |
+| 04b-clef-in-multirest-range | clef 1/1, note 4/4 | equal |
 | 05-cue-clef-after-barline | clef 1/1, note 3/3 | equal |
 | 05b-cue-clef-system-start | clef 1/1, note 3/3 | equal |
 | 05c-cue-clef-page-break-defaults | clef 1/1, note 3/3 | equal |
@@ -139,7 +141,7 @@ defects below.
 | 13-per-staff-transpose | key 1/0, transpose 2/1 | key 1/0, transpose 2/1 |
 | 14-words-hidden-staff-mmrest | (added at the end) | equal, but the words on staff 1 are not drawn |
 
-04/04b are explained under "Other problems found", 08 under defect 5, and 10 to 13 under "Untested items". I looked at
+04/04b became equal with the clef fixes below, 08 is explained under defect 5, and 10 to 13 under "Untested items". I looked at
 the PNGs of 01, 03, 04 and 09 from the final build, of 02, 06 and 07 from the build of the commit that fixed them,
 and of 13 from the baseline. Repros 10 to 13 are new (commit `ea9417c3`).
 
@@ -222,9 +224,9 @@ set by layout (every clef change is drawn small, every header clef full size) an
 measure. In the parts, all 60 `size="cue"` clefs are after-barline clefs before cue notes, and the two plain
 after-barline clefs are not followed by cue notes (counted by a research subagent on the input files). **This is a
 heuristic and upstream may prefer a saved clef property**, which would mean a new `Pid`, reading and writing it in
-mscx, and setting it at import. In the final run of the parts, 59 of the 60 printed cue clefs come back with
-`size="cue"`; in addition, 21 clefs that the end-of-bar problem (see "Other problems found") moves after the barline
-in front of cue notes get `size="cue"` although the print has a plain clef there.
+mscx, and setting it at import. In the final run of the parts, all 60 printed cue clefs come back with `size="cue"`
+and no other clef gets it. (Before the end-of-bar clef fix below, 21 plain clefs that the import moved after the
+barline in front of cue notes wrongly got it.)
 
 Tests: `cueNotes` (now a reference test, new `testCueNotes_ref.xml`, input kept without `size`), `cueRests`, `cueClef`,
 `cueClefRoundTrip`; changed `testCueGraceNotes_ref.xml`, `testCueNotes2_ref.xml`.
@@ -318,7 +320,7 @@ reserved name without permission. MuseScore keeps the `.sfd` in its tree as a co
 modified it before (2018), but the point should be raised if this goes upstream. The 12 parts contain no figured bass,
 so this affects only the repro.
 
-### 9. Printed vertical layout: fixed for the distances
+### 9. Printed vertical layout: fixed
 
 Design note (written before the implementation, from a research subagent's analysis and my own reading of
 `systemlayout.cpp` and `pagelayout.cpp`):
@@ -407,6 +409,30 @@ number="2"` is given in systems where staff 1 is not printed; the values look li
 96 conversions of the repros (16 files, 3 rounds, MusicXML and PDF) and all conversions of the full parts with the
 final build exited with code 0, without `mutex lock failed` or similar messages. I did not look further.
 
+## Clef changes at the end of a bar (added after the first report)
+
+Fixed at your request. Two commits:
+
+- `3f4853fc` (import): `MusicXmlParserPass2::clef()` gave every clef that is not at the start of its measure
+  `ClefToBarlinePosition::AFTER` (the `else` branch also covers a clef at the end of the measure), so layout moved a
+  clef change at the end of a bar after the next barline, and export wrote it as `after-barline="yes"`. 4.7.4 has the
+  same code. Now only a clef at the start of the measure gets AFTER. Tests: `clefMeasureEnd1` (the model has no
+  after-barline position for the end-of-bar clef) and `clefMeasureEnd2` (export).
+- `8a698c0f` (export): with the clef now at the end of the bar, a clef at the end of the last bar of a multimeasure rest
+  was dropped on export, because layout moves it into the measure that replaces the rest and the exporter looked in
+  the underlying measure. This is an export bug of its own (a MuseScore score with such a clef loses it too). Test:
+  `clefMultiRestEnd` (from an `.mscx` with a multirest; it fails without the fix).
+
+Result: repros 04 and 04b are equal, and the clef column of the parts went from up to 42/25 per part to 0/0 in nine
+parts; the rest are the encoding cases under "Other problems found". The page counts are unchanged.
+
+The checker counted an attribute for the next measure only if no note followed it in document order. Many cue
+passages in the parts end voice 1 with a clef and then give the player's rest in voice 2 after a `<backup>`; MuseScore
+writes such a clef at the start of the next measure, which the old rule counted as lost and gained. `6ec431d8`
+compares times instead (a later note in any voice must start at or after the attribute). Rechecking the baseline
+outputs with the new rule changes almost nothing (fl2 clef 26/15 → 27/16, ob1 key 3/3 → 2/2), so the improvement in
+the tables comes from the fixes.
+
 ## Updated reference files
 
 Changed reference files, with the commit that changed them:
@@ -436,6 +462,8 @@ Changed reference files, with the commit that changed them:
   `testVoltaHiding_ref.mscx`; new `testSystemDividers_ref.xml` (test changed from round trip to reference).
 - `0e8d165a`: `testCourtesyAccidentals*` (test file extended).
 - `c20c6b6f` (system locks only): the 24 files listed under defect 9.
+- `8a698c0f`, `3f4853fc`: none changed; new `testClefMultiRestEnd.mscx`, `testClefMultiRestEnd_ref.xml`,
+  `testClefMeasureEnd.xml`, `testClefMeasureEnd_ref.mscx`, `testClefMeasureEnd_ref.xml`.
 
 No input file of an existing test was changed.
 
@@ -463,7 +491,7 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
   - **Clef after the last rest of a multirest: does not reproduce.** In copies of vadam2 (treble-8 clef moved from
     bar 28 to after the rest of bar 27, the end of the 4-bar multirest 24–27) and ob1 (treble clef moved from bar 62 to
     after the rest of bar 61), the following cue is drawn in the new clef with correct pitches. The moved clef is drawn
-    after the barline, which is the end-of-bar clef problem below.
+    after the barline, which was the end-of-bar clef problem (since fixed, see "Clef changes at the end of a bar").
   - **Words on a hidden staff 1: reproduces, but only when the direction is in the first bar of a collapsed
     multirest.** In copies of gamba ("19. Arioso", start of a 14-bar multirest) and liuto ("18c. Evangelista", start
     of a 4-bar multirest) the text is missing from the PDF, while the `.mscx` still has the staff text. Outside a
@@ -478,17 +506,9 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
 
 ## Other problems found (not fixed)
 
-- **Plain clef changes are still lost in several parts** (clef column; for example va 29/12, vn2 27/12, ob2 24/10).
-  Part of this is the end-of-bar problem in the next item. I did not find the rest: a minimal file with a clef change
-  in the middle of a bar before a rest round-trips correctly. Places to start: va bars 17 and 30 of no. 14 (measure
-  indices 111 and 124 in the checker), where cue passages change clef several times within a bar.
-- **A clef change at the end of a bar is drawn after the next barline.** `MusicXmlParserPass2::clef()` gives every
-  clef that is not at the start of the measure `ClefToBarlinePosition::AFTER` (the `else` branch around
-  `importmusicxmlpass2.cpp:6340`), so a clef at the end of a bar is moved after the next barline by layout and exported
-  as `after-barline="yes"`. 4.7.4 has the same import code and draws repro 04 the same way. Setting AFTER only when
-  `tick == measure->tick()` should fix it, but I have not tested that. This is the main remaining source of clef
-  differences in the parts and the reason why repro 04/04b now show `size=cue,after-barline=yes` (the cue clef
-  heuristic of defect 4 applies to the moved clef).
+- The five remaining clef differences (bc 2/0, ob2 2/0, fl2 1/1) come from the encoding: bc bar 1 gives the clefs
+  of staves 2 and 3 twice each, ob2 bar 44 has three clefs on staff 3 at the same instant (G, G and a cue F), and in
+  fl2 bar 18 voice 1 lasts only half the bar, so MuseScore fills it with a rest after the clef.
 - MuseScore fills gaps in voices with rests (liuto note 0/99): the checker counts them as gained notes.
 - Jump texts (Da capo, al Fine, tacet) are exported on staff 1 of the part (gamba words 3/3).
 - Barline differences in several parts (for example bc 21/1) were not investigated.
@@ -518,5 +538,6 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
 - **Extra commits** not in the defect list: `f75a44e9` (converter crash, needed to measure anything), `68e4e8db` (cue
   rests, part of defect 4's checker numbers), `b97579b2` (print-object, part of defect 5) and `0e8d165a` (tied-over
   accidentals, part of defect 1). Defect 4 is split into three commits so that the clef heuristic can be dropped on its
-  own.
+  own. Added after the first report, at your request: `c20c6b6f` (system locks), `8a698c0f` and `3f4853fc` (clefs
+  at the end of a bar), and the checker change `6ec431d8`.
 - I did not run `tools/codestyle/tidy_file.sh` with upstream's uncrustify version (see "Build and environment").
