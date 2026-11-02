@@ -8011,6 +8011,46 @@ static bool tickIsInMiddleOfMeasure(const Fraction ti, const Measure* m)
 }
 
 //---------------------------------------------------------
+//  isCueClef
+//---------------------------------------------------------
+
+/**
+ Return true if small chords or rests follow \a clef on its staff before the
+ next clef in the measure.
+ */
+
+static bool isCueClef(const Clef* clef)
+{
+    const track_idx_t strack = trackZeroVoice(clef->track());
+    for (const Segment* seg = clef->segment()->next(); seg; seg = seg->next()) {
+        if (seg->isClefType() && seg->element(strack)) {
+            return false;
+        }
+        if (!seg->isChordRestType()) {
+            continue;
+        }
+        for (track_idx_t track = strack; track < strack + VOICES; ++track) {
+            const EngravingItem* el = seg->element(track);
+            if (!el) {
+                continue;
+            }
+            const ChordRest* cr = toChordRest(el);
+            if (cr->isSmall()) {
+                return true;
+            }
+            if (cr->isChord()) {
+                for (const Note* note : toChord(cr)->notes()) {
+                    if (note->isSmall()) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+//---------------------------------------------------------
 //  writeElement
 //---------------------------------------------------------
 
@@ -8037,7 +8077,9 @@ void ExportMusicXml::writeElement(EngravingItem* el, const Measure* m, staff_idx
         } else if (!el->generated() && tickIsInMiddleOfMeasure(ti, m)) {
             clef(sstaff, cle->clefType(), color2xml(cle) + visible);
         } else if (!el->generated() && (ti == m->tick()) && (cle->segment()->segmentType() != SegmentType::HeaderClef)) {
-            clef(sstaff, cle->clefType(), color2xml(cle) + visible + String(u" after-barline=\"yes\""));
+            // a clef after the barline that introduces cue notes is a cue clef
+            const String size = isCueClef(cle) ? String(u" size=\"cue\"") : String();
+            clef(sstaff, cle->clefType(), color2xml(cle) + visible + size + String(u" after-barline=\"yes\""));
         } else {
             clefDebug("exportxml: clef not exported");
         }

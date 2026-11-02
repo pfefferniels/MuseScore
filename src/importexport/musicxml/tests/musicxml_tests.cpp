@@ -518,6 +518,12 @@ TEST_F(MusicXml_Tests, courtesyAccidentalsExport) {
 TEST_F(MusicXml_Tests, courtesyAccidentalsRoundTrip) {
     musicXmlIoTest("testCourtesyAccidentals_ref");
 }
+TEST_F(MusicXml_Tests, cueClef) {
+    musicXmlIoTestRef("testCueClef");
+}
+TEST_F(MusicXml_Tests, cueClefRoundTrip) {
+    musicXmlIoTest("testCueClef_ref");
+}
 TEST_F(MusicXml_Tests, cueGraceNotes1) {
     musicXmlImportTestRef("testCueGraceNotes");
 }
