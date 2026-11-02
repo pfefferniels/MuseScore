@@ -800,6 +800,12 @@ TEST_F(MusicXml_Tests, helloReadCompr) {
 TEST_F(MusicXml_Tests, helloReadWriteCompr) {
     musicXmlReadWriteTestCompr("testHello");
 }
+TEST_F(MusicXml_Tests, hiddenCueStaff) {
+    musicXmlIoTestRef("testHiddenCueStaff");
+}
+TEST_F(MusicXml_Tests, hiddenCueStaffRoundTrip) {
+    musicXmlIoTest("testHiddenCueStaff_ref");
+}
 TEST_F(MusicXml_Tests, holes) {
     musicXmlIoTest("testHoles");
 }
