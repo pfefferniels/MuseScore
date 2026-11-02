@@ -281,6 +281,11 @@ void Ornament::computeNotesAboveAndBelow(AccidentalState* accState)
 
         if (!note) {
             note = mainNote->clone();
+            // the accidental state decides the ornament note's accidental; a courtesy accidental of the main note
+            // would be kept with a new type and make the next note on that line restate its accidental
+            if (Accidental* accidental = note->accidental(); accidental && accidental->role() == AccidentalRole::USER) {
+                accidental->setRole(AccidentalRole::AUTO);
+            }
             Tie* tie = note->tieFor();
             if (tie) {
                 score()->undoRemoveElement((EngravingItem*)tie);

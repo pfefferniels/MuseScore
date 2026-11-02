@@ -1713,6 +1713,10 @@ TEST_F(MusicXml_Tests, tremolo) {
 TEST_F(MusicXml_Tests, trills) {
     musicXmlMscxExportTestRef("testTrills");
 }
+TEST_F(MusicXml_Tests, trillCourtesyAccidental) {
+    // the trill of a note with a courtesy accidental neither gets an accidental of its own nor adds one to the next note
+    musicXmlIoTestRef("testTrillCourtesyAccidental");
+}
 TEST_F(MusicXml_Tests, tuplets1) {
     musicXmlIoTestRef("testTuplets1");
 }
