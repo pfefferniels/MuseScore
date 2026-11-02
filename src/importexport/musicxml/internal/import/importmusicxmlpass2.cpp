@@ -8716,9 +8716,7 @@ void MusicXmlParserLyric::parse(bool visibility)
         l->setSyllabic(syllabic);
         m_numberedLyrics[lyricNo] = l;
 
-        if (hasExtend
-            && (extendType.empty() || extendType == "start")
-            && (l->syllabic() == LyricsSyllabic::SINGLE || l->syllabic() == LyricsSyllabic::END)) {
+        if (hasExtend && (extendType.empty() || extendType == "start")) {
             m_extendedLyrics.insert(l);
         }
     } else if (item->isSticking()) {

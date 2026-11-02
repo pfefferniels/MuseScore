@@ -163,7 +163,7 @@ void LyricsLayout::layout(Lyrics* item, LayoutContext& ctx)
 
     ldata->setPosX(x);
 
-    if (item->ticks().isNotZero()) {
+    if (item->ticks().isNotZero() && (item->syllabic() == LyricsSyllabic::SINGLE || item->syllabic() == LyricsSyllabic::END)) {
         // set melisma end
         ChordRest* ecr = ctx.mutDom().findCR(item->endTick(), item->track());
         if (ecr) {

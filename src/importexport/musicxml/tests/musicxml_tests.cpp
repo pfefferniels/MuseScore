@@ -1057,6 +1057,12 @@ TEST_F(MusicXml_Tests, lyricExtension3) {
 TEST_F(MusicXml_Tests, lyricExtension4) {
     musicXmlImportTestRef("testLyricExtension2");
 }
+TEST_F(MusicXml_Tests, lyricExtendHyphenated1) {
+    musicXmlImportTestRef("testLyricExtendHyphenated");
+}
+TEST_F(MusicXml_Tests, lyricExtendHyphenated2) {
+    musicXmlIoTestRef("testLyricExtendHyphenated");
+}
 TEST_F(MusicXml_Tests, lyricExtensionStartContinueStop) {
     musicXmlIoTestRef("testLyricExtensionStartContinueStop");
 }

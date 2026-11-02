@@ -146,7 +146,12 @@ public:
     virtual Lyrics* lyrics() const { return toLyrics(ownershipParent()); }
     Lyrics* nextLyrics() const { return m_nextLyrics; }
     void setNextLyrics(Lyrics* l) { m_nextLyrics = l; }
-    virtual bool isEndMelisma() const { return lyrics() && lyrics()->ticks().isNotZero(); }
+    // a hyphenated syllable keeps its dashes when it is held, its ticks only record the melisma
+    virtual bool isEndMelisma() const
+    {
+        return lyrics() && lyrics()->ticks().isNotZero()
+               && (lyrics()->syllabic() == LyricsSyllabic::SINGLE || lyrics()->syllabic() == LyricsSyllabic::END);
+    }
     bool isDash() const { return !isEndMelisma(); }
 
     bool setProperty(Pid propertyId, const PropertyValue& v) override;
