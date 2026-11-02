@@ -3560,6 +3560,8 @@ void TRead::read(PartialTie* p, XmlReader& xml, ReadContext& ctx)
         const AsciiStringView tag(xml.name());
         if (TRead::readProperty(p, tag, xml, ctx, Pid::TIE_PLACEMENT)) {
         } else if (TRead::readProperty(p, tag, xml, ctx, Pid::PARTIAL_SPANNER_DIRECTION)) {
+        } else if (tag == "isStandalone") {
+            p->setIsStandalone(xml.readBool());
         } else if (!readProperties(toSlurTie(p), xml, ctx)) {
             xml.unknown();
         }

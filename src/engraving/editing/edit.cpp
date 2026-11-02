@@ -5433,7 +5433,7 @@ void Score::undoRemoveStaleTieJumpPoints(bool undo)
     }
 
     for (PartialTie* incomingPT : incomingPartialTies) {
-        if (incomingPT->jumpPoint() || incomingPT->note()->tieBack() != incomingPT) {
+        if (incomingPT->jumpPoint() || incomingPT->isStandalone() || incomingPT->note()->tieBack() != incomingPT) {
             continue;
         }
         const size_t undoIdx = undoStack()->currentIndex();

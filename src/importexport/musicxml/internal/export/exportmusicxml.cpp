@@ -99,6 +99,7 @@
 #include "engraving/dom/page.h"
 #include "engraving/dom/palmmute.h"
 #include "engraving/dom/part.h"
+#include "engraving/dom/partialtie.h"
 #include "engraving/dom/pedal.h"
 #include "engraving/dom/pickscrape.h"
 #include "engraving/dom/pitchspelling.h"
@@ -4405,7 +4406,8 @@ void ExportMusicXml::chord(Chord* chord, staff_idx_t staff, const std::vector<Ly
         }
 
         if (!isCueNote(note)) {
-            if (note->tieBackNonPartial()) {
+            const PartialTie* incomingPartialTie = note->incomingPartialTie();
+            if (note->tieBackNonPartial() || (incomingPartialTie && incomingPartialTie->isStandalone())) {
                 m_xml.tag("tie", { { "type", "stop" } });
             }
             if (note->tieForNonPartial()) {

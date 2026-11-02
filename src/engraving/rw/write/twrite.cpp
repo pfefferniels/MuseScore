@@ -2710,6 +2710,9 @@ void TWrite::write(const PartialTie* item, XmlWriter& xml, WriteContext& ctx)
     xml.startElement(item);
     writeProperty(item, xml, Pid::TIE_PLACEMENT);
     writeProperty(item, xml, Pid::PARTIAL_SPANNER_DIRECTION);
+    if (item->isStandalone()) {
+        xml.tag("isStandalone", true);
+    }
     writeProperties(static_cast<const SlurTie*>(item), xml, ctx);
     xml.endElement();
 }

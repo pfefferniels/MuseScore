@@ -24,6 +24,7 @@
 
 #include "dom/arpeggio.h"
 #include "dom/note.h"
+#include "dom/partialtie.h"
 #include "dom/staff.h"
 #include "dom/swing.h"
 #include "dom/tremolosinglechord.h"
@@ -52,7 +53,9 @@ bool NoteRenderer::shouldRender(const Note* note, const RenderingContext& ctx, c
         const Note* startNote = tie->startNote();
         const Note* endNote = tie->endNote();
         if (!startNote || !endNote) {
-            return false;
+            // A standalone incoming tie starts outside the score, so the note sounds
+            const PartialTie* incomingPartialTie = note->incomingPartialTie();
+            return incomingPartialTie && incomingPartialTie->isStandalone();
         }
 
         if (tie->isPartialTie()) {

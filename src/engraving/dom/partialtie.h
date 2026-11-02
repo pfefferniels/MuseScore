@@ -73,11 +73,18 @@ public:
 
     Note* startNote() const override;
 
+    // An incoming tie from a note outside the score, not from a jump
+    bool isStandalone() const { return m_isStandalone; }
+    void setIsStandalone(bool v) { m_isStandalone = v; }
+
     PartialTieSegment* frontSegment() { return toPartialTieSegment(Spanner::frontSegment()); }
     const PartialTieSegment* frontSegment() const { return toPartialTieSegment(Spanner::frontSegment()); }
     PartialTieSegment* backSegment() { return toPartialTieSegment(Spanner::backSegment()); }
     const PartialTieSegment* backSegment() const { return toPartialTieSegment(Spanner::backSegment()); }
     PartialTieSegment* segmentAt(int n) { return toPartialTieSegment(Spanner::segmentAt(n)); }
     const PartialTieSegment* segmentAt(int n) const { return toPartialTieSegment(Spanner::segmentAt(n)); }
+
+private:
+    bool m_isStandalone = false;
 };
 }

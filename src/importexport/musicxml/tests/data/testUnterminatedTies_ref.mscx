@@ -392,62 +392,69 @@
             <StemDirection>up</StemDirection>
             <Note>
               <eid>9_9</eid>
+              <PartialTie>
+                <partialSpannerDirection>incoming</partialSpannerDirection>
+                <isStandalone>1</isStandalone>
+                <endElement>9_9</endElement>
+                <eid>+_+</eid>
+                <track>0</track>
+                </PartialTie>
               <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             </Chord>
           <Rest>
-            <eid>+_+</eid>
+            <eid>/_/</eid>
             <durationType>quarter</durationType>
             </Rest>
           <Rest>
-            <eid>/_/</eid>
+            <eid>AB_AB</eid>
             <durationType>half</durationType>
             </Rest>
           </voice>
         </Measure>
       <Measure>
-        <eid>AB_AB</eid>
+        <eid>BB_BB</eid>
         <voice>
           <Chord>
-            <eid>BB_BB</eid>
+            <eid>CB_CB</eid>
             <durationType>quarter</durationType>
             <StemDirection>up</StemDirection>
             <Note>
-              <eid>CB_CB</eid>
+              <eid>DB_DB</eid>
               <pitch>65</pitch>
               <tpc>13</tpc>
               </Note>
             </Chord>
           <Chord>
-            <eid>DB_DB</eid>
+            <eid>EB_EB</eid>
             <durationType>quarter</durationType>
             <StemDirection>up</StemDirection>
             <Note>
-              <eid>EB_EB</eid>
+              <eid>FB_FB</eid>
               <pitch>67</pitch>
               <tpc>15</tpc>
               </Note>
             </Chord>
           <Chord>
-            <eid>FB_FB</eid>
+            <eid>GB_GB</eid>
             <durationType>quarter</durationType>
             <StemDirection>up</StemDirection>
             <Note>
-              <eid>GB_GB</eid>
+              <eid>HB_HB</eid>
               <pitch>65</pitch>
               <tpc>13</tpc>
               </Note>
             </Chord>
           <Chord>
-            <eid>HB_HB</eid>
+            <eid>IB_IB</eid>
             <durationType>quarter</durationType>
             <StemDirection>up</StemDirection>
             <Note>
-              <eid>IB_IB</eid>
+              <eid>JB_JB</eid>
               <LaissezVib>
-                <startElement>IB_IB</startElement>
-                <eid>JB_JB</eid>
+                <startElement>JB_JB</startElement>
+                <eid>KB_KB</eid>
                 <track>0</track>
                 </LaissezVib>
               <pitch>67</pitch>
@@ -456,7 +463,7 @@
             </Chord>
           <BarLine>
             <subtype>end</subtype>
-            <eid>KB_KB</eid>
+            <eid>LB_LB</eid>
             </BarLine>
           </voice>
         </Measure>

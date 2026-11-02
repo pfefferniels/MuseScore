@@ -53,6 +53,7 @@
 #include "dom/note.h"
 #include "dom/noteevent.h"
 #include "dom/part.h"
+#include "dom/partialtie.h"
 #include "dom/repeatlist.h"
 #include "dom/score.h"
 #include "dom/segment.h"
@@ -832,7 +833,10 @@ static void collectNote(EventsHolder& events, const Note* note, const CollectNot
         // its length was already added to previous note
         // if we wish to suppress first note of ornament
         // then change "nels == 1" to "i == 0", and change "break" to "continue"
-        if (note->tieBack() && nels == 1 && !isGlissandoFor(note)) {
+        // a standalone incoming tie starts outside the score, so the note sounds
+        const PartialTie* incomingPartialTie = note->incomingPartialTie();
+        const bool standaloneTie = incomingPartialTie && incomingPartialTie->isStandalone();
+        if (note->tieBack() && !standaloneTie && nels == 1 && !isGlissandoFor(note)) {
             Note* tiedBack = note->tieBack()->startNote();
             if (!tiedBack) {
                 break;

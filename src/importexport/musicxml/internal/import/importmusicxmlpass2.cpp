@@ -67,6 +67,7 @@
 #include "engraving/dom/note.h"
 #include "engraving/dom/ottava.h"
 #include "engraving/dom/part.h"
+#include "engraving/dom/partialtie.h"
 #include "engraving/dom/pedal.h"
 #include "engraving/dom/pitchspelling.h"
 #include "engraving/dom/rehearsalmark.h"
@@ -2406,6 +2407,17 @@ void MusicXmlParserPass2::part()
         if (!unendedTie->endNote()) {
             cleanupUnterminatedTie(unendedTie, m_score, m_pass1.exporterSoftware() == MusicXmlExporterSoftware::DOLET6);
         }
+    }
+
+    // A tie stop without start: the tie comes from a note outside the score
+    for (Note* endNote : m_unstartedTieNotes) {
+        if (endNote->tieBack()) {
+            continue;
+        }
+        PartialTie* partialTie = Factory::createPartialTie(endNote);
+        partialTie->setEndNote(endNote);
+        partialTie->setIsStandalone(true);
+        endNote->add(partialTie);
     }
 
     m_ties.clear();
@@ -9222,7 +9234,7 @@ static void addTie(const Notation& notation, Note* note, const track_idx_t track
             ties.erase(loc);
         } else {
             unstartedTieNotes.push_back(note);
-            logger->logError(String(u"Non-started tie terminated. No-op."), xmlreader);
+            logger->logDebugInfo(String(u"Non-started tie terminated"), xmlreader);
         }
     } else if (type == "let-ring") {
         LaissezVib* lvTie = Factory::createLaissezVib(note);

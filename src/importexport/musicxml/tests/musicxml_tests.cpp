@@ -23,9 +23,14 @@
 #include <gtest/gtest.h>
 
 #include "engraving/engravingerrors.h"
+#include "engraving/dom/chord.h"
 #include "engraving/dom/jump.h"
 #include "engraving/dom/marker.h"
 #include "engraving/dom/masterscore.h"
+#include "engraving/dom/measure.h"
+#include "engraving/dom/note.h"
+#include "engraving/dom/partialtie.h"
+#include "engraving/dom/segment.h"
 #include "engraving/dom/staff.h"
 #include "engraving/dom/stafftype.h"
 
@@ -1411,6 +1416,24 @@ TEST_F(MusicXml_Tests, testTextOrder) {
 }
 TEST_F(MusicXml_Tests, textQuirkInference) {
     musicXmlImportTestRef("testTextQuirkInference");
+}
+TEST_F(MusicXml_Tests, tieStopWithoutStart) {
+    musicXmlIoTest("testTieStopWithoutStart");
+}
+TEST_F(MusicXml_Tests, tieStopWithoutStartKept) {
+    // the cleanup of stale partial ties, which runs on load and on repeat changes, keeps the tie
+    MasterScore* score = readScore(XML_IO_DATA_DIR + u"testTieStopWithoutStart.xml");
+    ASSERT_TRUE(score);
+    fixupScore(score);
+    score->undoRemoveStaleTieJumpPoints(false);
+
+    const Segment* seg = score->firstMeasure()->first(SegmentType::ChordRest);
+    ASSERT_TRUE(seg && seg->element(0) && seg->element(0)->isChord());
+    const PartialTie* partialTie = toChord(seg->element(0))->upNote()->incomingPartialTie();
+    ASSERT_TRUE(partialTie);
+    EXPECT_TRUE(partialTie->isStandalone());
+
+    delete score;
 }
 TEST_F(MusicXml_Tests, tieTied) {
     musicXmlIoTestRef("testTieTied");
