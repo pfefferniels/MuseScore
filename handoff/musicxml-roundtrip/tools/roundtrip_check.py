@@ -61,9 +61,15 @@ def note_value(note: ET.Element, divisions: int) -> str:
 
 
 def is_filler_rest(note: ET.Element) -> bool:
-    """Whole-measure rests MuseScore adds to otherwise empty staves or voices."""
+    """Whole-measure rests MuseScore adds to otherwise empty staves or voices, and unprinted rests that carry nothing
+    but time, which are the same as a <forward> (MuseScore fills holes in a voice with them)."""
     rest = note.find("rest")
-    return rest is not None and rest.get("measure") == "yes" and note.find("cue") is None
+    if rest is None:
+        return False
+    whole_measure = rest.get("measure") == "yes" and note.find("cue") is None
+    only_time = (note.get("print-object") == "no" and note.find("lyric") is None and note.find("notations") is None
+                 and note.find("time-modification") is None)
+    return whole_measure or only_time
 
 
 def note_facts(note: ET.Element, divisions: int) -> Iterator[tuple[str, str]]:
@@ -109,23 +115,47 @@ def attribute_facts(attributes: ET.Element, staves: int) -> Iterator[tuple[str, 
     yield from transpose_facts(attributes, staves)
 
 
+JUMP_SOUNDS = ("segno", "coda", "dalsegno", "dacapo", "fine", "tocoda")
+
+
+def sound_facts(sound: ET.Element | None) -> Iterator[tuple[str, str]]:
+    """Jumps and markers of a <sound>; the values are ids that only have to match within a file."""
+    for name in JUMP_SOUNDS:
+        if sound is not None and sound.get(name) is not None:
+            yield "jump", f"sound {name}"
+
+
 def direction_facts(direction: ET.Element) -> Iterator[tuple[str, str]]:
     for words in direction.findall("direction-type/words"):
         yield "words", (words.text or "").strip()
     for dynamics in direction.findall("direction-type/dynamics"):
         yield "dynamics", " ".join(child.tag for child in dynamics)
+    for sign in ("segno", "coda"):
+        for _ in direction.findall(f"direction-type/{sign}"):
+            yield "jump", sign
+    yield from sound_facts(direction.find("sound"))
 
 
 def child_times(measure: ET.Element) -> list[int]:
-    """Time of each child of the measure, in divisions, following note durations, backup and forward."""
-    times, t = [], 0
+    """Time of each child of the measure, in divisions, following note durations, backup and forward. A chord note
+    starts with the note before it."""
+    times, t, onset = [], 0, 0
     for child in measure:
-        times.append(t)
-        if child.tag == "note" and child.find("chord") is None or child.tag == "forward":
+        is_chord_note = child.tag == "note" and child.find("chord") is not None
+        times.append(onset if is_chord_note else t)
+        if child.tag == "note" and not is_chord_note or child.tag == "forward":
+            onset = t
             t += int(text_of(child, "duration", "0"))
         elif child.tag == "backup":
             t -= int(text_of(child, "duration", "0"))
     return times
+
+
+def measure_length(measure: ET.Element, times: list[int]) -> int:
+    """The furthest time a note or forward of the measure reaches, in divisions."""
+    ends = [t + int(text_of(c, "duration", "0")) for t, c in zip(times, measure)
+            if c.tag == "forward" or c.tag == "note" and c.find("chord") is None]
+    return max(ends, default=0)
 
 
 def is_trailing(measure: ET.Element, index: int) -> bool:
@@ -166,9 +196,13 @@ def measure_facts(part_index: int, measure_index: int, measure: ET.Element, divi
     def fact(category: str, staff: str, value: str, index: int = measure_index) -> Fact:
         return Fact(category, part_index, index, staff, value)
 
+    times = child_times(measure)
+    yield fact("measure-len", "all", str(Fraction(measure_length(measure, times), divisions)))
+    barlines = set()
     for position, child in enumerate(measure):
         if child.tag == "note" and not is_filler_rest(child):
-            yield from (fact(c, staff_of(child), v) for c, v in note_facts(child, divisions))
+            onset = f" @{Fraction(times[position], divisions)}"
+            yield from (fact(c, staff_of(child), v + (onset if c == "note" else "")) for c, v in note_facts(child, divisions))
         elif child.tag == "attributes":
             state.update(child)
             index = measure_index + is_trailing(measure, position)
@@ -179,7 +213,13 @@ def measure_facts(part_index: int, measure_index: int, measure: ET.Element, divi
             figures = " ".join(f"{text_of(f, 'prefix')}{text_of(f, 'figure-number')}{text_of(f, 'suffix')}" for f in child.findall("figure"))
             yield fact("figured-bass", "1", figures)
         elif child.tag == "barline":
-            yield fact("barline", "all", f"{child.get('location', 'right')} {text_of(child, 'bar-style')}")
+            # a barline belongs to the measure of the part, some files repeat it after each staff
+            value = f"{child.get('location', 'right')} {text_of(child, 'bar-style')}"
+            if value not in barlines:
+                barlines.add(value)
+                yield fact("barline", "all", value)
+        elif child.tag == "sound":
+            yield from (fact(c, "all", v) for c, v in sound_facts(child))
         elif child.tag == "print":
             breaks = attrs(child, "new-system", "new-page")
             if breaks:
