@@ -99,9 +99,24 @@ def direction_facts(direction: ET.Element) -> Iterator[tuple[str, str]]:
         yield "dynamics", " ".join(child.tag for child in dynamics)
 
 
+def child_times(measure: ET.Element) -> list[int]:
+    """Time of each child of the measure, in divisions, following note durations, backup and forward."""
+    times, t = [], 0
+    for child in measure:
+        times.append(t)
+        if child.tag == "note" and child.find("chord") is None or child.tag == "forward":
+            t += int(text_of(child, "duration", "0"))
+        elif child.tag == "backup":
+            t -= int(text_of(child, "duration", "0"))
+    return times
+
+
 def is_trailing(measure: ET.Element, index: int) -> bool:
-    """No note or forward follows, so the element takes effect where the next measure starts."""
-    return not any(c.tag in ("note", "forward") for c in list(measure)[index + 1:])
+    """No note or forward in any voice starts at or after the element, so it takes effect where the next measure
+    starts. A note of another voice that follows after a backup but starts earlier does not count."""
+    children, times = list(measure), child_times(measure)
+    return not any(c.tag in ("note", "forward") and times[i] >= times[index]
+                   for i, c in enumerate(children) if i > index)
 
 
 def measure_facts(part_index: int, measure_index: int, measure: ET.Element, divisions: int) -> Iterator[Fact]:
