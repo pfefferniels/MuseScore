@@ -450,6 +450,12 @@ TEST_F(MusicXml_Tests, barStyles4) {
 TEST_F(MusicXml_Tests, bracketTypes) {
     musicXmlImportTestRef("testBracketTypes");
 }
+TEST_F(MusicXml_Tests, bracketHooks) {
+    musicXmlImportTestRef("testBracketHooks");
+}
+TEST_F(MusicXml_Tests, bracketHooksRoundTrip) {
+    musicXmlIoTestRef("testBracketHooks");
+}
 TEST_F(MusicXml_Tests, DISABLED_beamEnd) {
     musicXmlIoTest("testBeamEnd");
 }
