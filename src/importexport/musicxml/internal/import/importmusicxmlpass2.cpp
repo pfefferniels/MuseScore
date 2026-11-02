@@ -2124,6 +2124,7 @@ void MusicXmlParserPass2::scorePartwise()
     }
     addError(checkAtEndElement(m_e, u"score-partwise"));
 
+    moveTextFromHiddenStaves();
     addVerticalLayout();
     lockPrintedSystems();
 
@@ -3185,6 +3186,83 @@ static void addSpacer(Measure* measure, const staff_idx_t staffIdx, const Spacer
 }
 
 //---------------------------------------------------------
+//   isStaffPrinted
+//---------------------------------------------------------
+
+/**
+ Return whether the staff is printed at \a tick according to the print-object
+ of its staff-details.
+ */
+
+bool MusicXmlParserPass2::isStaffPrinted(const staff_idx_t staffIdx, const Fraction& tick) const
+{
+    if (!m_score->staff(staffIdx)->show()) {
+        return false;
+    }
+    const auto changes = m_staffPrinted.find(staffIdx);
+    if (changes == m_staffPrinted.end()) {
+        return true;
+    }
+    auto it = changes->second.upper_bound(tick);
+    return it == changes->second.begin() || std::prev(it)->second;
+}
+
+//---------------------------------------------------------
+//   moveTextFromHiddenStaves
+//---------------------------------------------------------
+
+/**
+ Move text from a staff that is not printed and has no notes in the measure
+ to the nearest printed staff of the part, preferring the one below. Text
+ would otherwise keep the empty staff visible, or disappear with it inside a
+ multimeasure rest, while the print shows the text and not the staff.
+ */
+
+void MusicXmlParserPass2::moveTextFromHiddenStaves()
+{
+    if (m_staffPrinted.empty()) {
+        return;
+    }
+    for (Measure* measure = m_score->firstMeasure(); measure; measure = measure->nextMeasure()) {
+        for (Segment* segment = measure->first(SegmentType::ChordRest); segment; segment = segment->next(SegmentType::ChordRest)) {
+            for (EngravingItem* annotation : segment->annotations()) {
+                if (!annotation->isTextBase() || annotation->systemFlag()) {
+                    continue;
+                }
+                const staff_idx_t staffIdx = annotation->staffIdx();
+                if (isStaffPrinted(staffIdx, measure->tick())) {
+                    continue;
+                }
+                bool hasNotes = false;
+                for (voice_idx_t voice = 0; voice < VOICES; ++voice) {
+                    hasNotes = hasNotes || !measure->isOnlyRests(staffIdx * VOICES + voice);
+                }
+                if (hasNotes) {
+                    continue;
+                }
+                const Part* part = annotation->part();
+                const staff_idx_t firstStaff = m_score->staffIdx(part);
+                const staff_idx_t endStaff = firstStaff + part->nstaves();
+                staff_idx_t target = muse::nidx;
+                for (staff_idx_t i = staffIdx + 1; i < endStaff && target == muse::nidx; ++i) {
+                    if (isStaffPrinted(i, measure->tick())) {
+                        target = i;
+                    }
+                }
+                for (staff_idx_t i = staffIdx; i > firstStaff && target == muse::nidx; --i) {
+                    if (isStaffPrinted(i - 1, measure->tick())) {
+                        target = i - 1;
+                    }
+                }
+                if (target != muse::nidx) {
+                    annotation->setTrack(target * VOICES + annotation->voice());
+                }
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------
 //   lockPrintedSystems
 //---------------------------------------------------------
 
@@ -3245,18 +3323,6 @@ void MusicXmlParserPass2::addVerticalLayout()
     const std::set<int>& systemStarts = m_pass1.systemStartMeasureNrs();
     const std::set<int>& pageStarts = m_pass1.pageStartMeasureNrs();
 
-    auto isPrinted = [this](staff_idx_t staffIdx, const Fraction& tick) {
-        if (!m_score->staff(staffIdx)->show()) {
-            return false;
-        }
-        const auto changes = m_staffPrinted.find(staffIdx);
-        if (changes == m_staffPrinted.end()) {
-            return true;
-        }
-        auto it = changes->second.upper_bound(tick);
-        return it == changes->second.begin() || std::prev(it)->second;
-    };
-
     Measure* prevAnchor = nullptr;
     staff_idx_t prevLastStaff = muse::nidx;
     size_t first = 0;
@@ -3270,7 +3336,7 @@ void MusicXmlParserPass2::addVerticalLayout()
         const Fraction tick = measures[first]->tick();
         std::vector<staff_idx_t> printed;
         for (staff_idx_t staffIdx = 0; staffIdx < m_score->nstaves(); ++staffIdx) {
-            if (isPrinted(staffIdx, tick)) {
+            if (isStaffPrinted(staffIdx, tick)) {
                 printed.push_back(staffIdx);
             }
         }

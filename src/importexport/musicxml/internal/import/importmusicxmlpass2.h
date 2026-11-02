@@ -457,6 +457,8 @@ private:
     void systemLayout(engraving::Measure* measure);
     void staffLayout(const muse::String& partId, engraving::Measure* measure);
     void addVerticalLayout();
+    bool isStaffPrinted(engraving::staff_idx_t staffIdx, const engraving::Fraction& tick) const;
+    void moveTextFromHiddenStaves();
     void lockPrintedSystems();
     void setMeasureRepeats(const engraving::staff_idx_t scoreRelStaff, engraving::Measure* measure);
     void attributes(const muse::String& partId, engraving::Measure* measure, const engraving::Fraction& tick);

@@ -1684,3 +1684,9 @@ TEST_F(MusicXml_Tests, hiddenStaves)
 
     EXPECT_EQ(score->style().value(Sid::hideEmptyStaves).toBool(), true);
 }
+TEST_F(MusicXml_Tests, wordsHiddenStaff1) {
+    musicXmlImportTestRef("testWordsHiddenStaff");
+}
+TEST_F(MusicXml_Tests, wordsHiddenStaff2) {
+    musicXmlIoTestRef("testWordsHiddenStaff");
+}
