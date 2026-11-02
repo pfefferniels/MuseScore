@@ -219,6 +219,12 @@ REPROS["12-alter-without-accidental"] = score("alter without accidental", [
             note("F", 4, alter=1), note("G", 4), note("A", 4), note("B", 4)),
 ])
 
+# 12b. As 12, but the encoding declares that it gives every printed accidental.
+REPROS["12b-alter-without-accidental-declared"] = REPROS["12-alter-without-accidental"].replace(
+    "<work><work-title>alter without accidental</work-title></work>",
+    "<work><work-title>alter without accidental, accidentals declared</work-title></work>\n"
+    '  <identification><encoding><supports element="accidental" type="yes"/></encoding></identification>')
+
 # 13. Per-staff transposition: staff 1 an oboe d'amore in A, staff 2 a cue staff at concert pitch.
 REPROS["13-per-staff-transpose"] = score("per-staff transpose", [
     measure(1, attributes(clef("G", 2, 1) + clef("G", 2, 2), staves=2,
