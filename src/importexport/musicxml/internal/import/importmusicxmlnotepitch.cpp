@@ -55,6 +55,7 @@ static Accidental* accidental(muse::XmlStreamReader& e, Score* score)
     const bool brackets = e.asciiAttribute("bracket") == "yes";
     const bool noBrackets = e.asciiAttribute("bracket") == "no";
     const bool smallAccid = e.asciiAttribute("size") == "cue" || e.asciiAttribute("size") == "grace-cue";
+    const bool printObject = e.asciiAttribute("print-object") != "no";
     const Color accColor = Color(e.asciiAttribute("color").ascii());
     const String smufl = e.attribute("smufl");
 
@@ -77,6 +78,7 @@ static Accidental* accidental(muse::XmlStreamReader& e, Score* score)
             a->setColor(accColor);
         }
         a->setSmall(smallAccid);
+        a->setVisible(printObject);
         return a;
     }
 

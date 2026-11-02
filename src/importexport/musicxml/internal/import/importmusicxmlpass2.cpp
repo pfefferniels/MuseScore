@@ -2567,13 +2567,15 @@ static void handleBeamAndStemDir(ChordRest* cr, const BeamMode bm, const Directi
  as USER accidentals, so that they are kept. Follows the accidental state of each
  staff the way layout does, grace notes included. Notes sounding at the same time
  are checked against the state before them, as the file may print the accidental
- on any of them.
+ on any of them. If the file gives every printed accidental, add an invisible one
+ where layout would show an accidental that the file does not print.
  */
 
 static void markUserAccidentals(const staff_idx_t firstStaff,
                                 const size_t staves,
                                 const Measure* measure,
-                                const std::map<Note*, int>& alterMap)
+                                const std::map<Note*, int>& alterMap,
+                                const bool hideUnprinted)
 {
     const Score* score = measure->score();
     const track_idx_t startTrack = firstStaff * VOICES;
@@ -2584,7 +2586,9 @@ static void markUserAccidentals(const staff_idx_t firstStaff,
         AccidentalState currAcc;
         currAcc.init(staff->keySigEvent(measure->tick()));
 
-        auto markNotes = [&](const Chord* chord, const AccidentalState& prevAcc) {
+        const bool pitched = staff->isPitchedStaff(measure->tick());
+
+        auto markNotes = [&](const Chord* chord, const AccidentalState& prevAcc, const std::set<int>& printedLines) {
             if (chord->vStaffIdx() != staffIdx) {
                 return;
             }
@@ -2596,16 +2600,23 @@ static void markUserAccidentals(const staff_idx_t firstStaff,
                     continue;
                 }
                 const AccidentalVal noteAccVal = tpc2alter(nt->tpc());
+                // layout drops the accidental of a note tied from the same pitch
+                const Tie* tieBack = nt->tieBackNonPartial();
+                const bool tiedOver = tieBack && tieBack->startNote() && tieBack->startNote()->tpc() == nt->tpc();
                 if (muse::contains(alterMap, nt)) {
                     const AccidentalType accType = nt->accidental()->accidentalType();
-                    // layout drops the accidental of a note tied from the same pitch
-                    const Tie* tieBack = nt->tieBackNonPartial();
-                    const bool tiedOver = tieBack && tieBack->startNote() && tieBack->startNote()->tpc() == nt->tpc();
                     if (Accidental::isMicrotonal(accType) && accType < AccidentalType::END) {
                         nt->accidental()->setRole(AccidentalRole::USER);
                     } else if ((prevAccVal == noteAccVal || tiedOver) && Accidental::subtype2value(accType) == noteAccVal) {
                         nt->accidental()->setRole(AccidentalRole::USER);
                     }
+                } else if (hideUnprinted && pitched && !nt->accidental() && prevAccVal != noteAccVal && !tiedOver
+                           && !muse::contains(printedLines, line)) {
+                    Accidental* accidental = Factory::createAccidental(nt);
+                    accidental->setAccidentalType(noteAccVal == AccidentalVal::NATURAL
+                                                  ? AccidentalType::NATURAL : Accidental::value2subtype(noteAccVal));
+                    accidental->setVisible(false);
+                    nt->add(accidental);
                 }
                 currAcc.setAccidentalVal(line, noteAccVal);
             }
@@ -2628,16 +2639,25 @@ static void markUserAccidentals(const staff_idx_t firstStaff,
             }
             for (const Chord* chord : chords) {
                 for (const Chord* grace : chord->graceNotesBefore()) {
-                    markNotes(grace, currAcc);
+                    markNotes(grace, currAcc, {});
+                }
+            }
+            // lines on which one of the notes sounding now has a printed accidental
+            std::set<int> printedLines;
+            for (const Chord* chord : chords) {
+                for (Note* nt : chord->notes()) {
+                    if (chord->vStaffIdx() == staffIdx && muse::contains(alterMap, nt)) {
+                        printedLines.insert(absStep(nt->tpc(), nt->epitch()));
+                    }
                 }
             }
             const AccidentalState prevAcc = currAcc;
             for (const Chord* chord : chords) {
-                markNotes(chord, prevAcc);
+                markNotes(chord, prevAcc, printedLines);
             }
             for (const Chord* chord : chords) {
                 for (const Chord* grace : chord->graceNotesAfter()) {
-                    markNotes(grace, currAcc);
+                    markNotes(grace, currAcc, {});
                 }
             }
         }
@@ -3042,7 +3062,7 @@ void MusicXmlParserPass2::measure(const String& partId, const Fraction time)
 
     // mark superfluous accidentals as user accidentals
     const staff_idx_t scoreRelStaff = m_score->staffIdx(part);
-    markUserAccidentals(scoreRelStaff, part->nstaves(), measure, alterMap);
+    markUserAccidentals(scoreRelStaff, part->nstaves(), measure, alterMap, m_pass1.hasAllAccidentals());
 
     // multi-measure rest handling
     if (getAndDecMultiMeasureRestCount() == 0) {
@@ -7714,7 +7734,7 @@ Note* MusicXmlParserPass2::note(const String& partId,
         }
 
         if (acc) {
-            acc->setVisible(printObject);
+            acc->setVisible(printObject && acc->visible());
             note->add(acc);
             // save alter value for user accidental
             if (acc->accidentalType() != AccidentalType::NONE) {

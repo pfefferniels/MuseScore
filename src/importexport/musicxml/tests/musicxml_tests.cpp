@@ -386,6 +386,12 @@ TEST_F(MusicXml_Tests, accidentals2) {
 TEST_F(MusicXml_Tests, accidentals3) {
     musicXmlIoTestRef("testAccidentals3");
 }
+TEST_F(MusicXml_Tests, alterWithoutAccidental1) {
+    musicXmlImportTestRef("testAlterWithoutAccidental");
+}
+TEST_F(MusicXml_Tests, alterWithoutAccidental2) {
+    musicXmlIoTestRef("testAlterWithoutAccidental");
+}
 TEST_F(MusicXml_Tests, arpCrossVoice) {
     musicXmlImportTestRef("testArpCrossVoice");
 }

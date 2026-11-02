@@ -2860,12 +2860,15 @@ int ExportMusicXml::findTrill(const Trill* tr) const
 
 static void writeAccidental(XmlWriter& xml, const String& tagName, const Accidental* const acc)
 {
-    if (acc) {
+    if (acc && ExportMusicXml::canWrite(acc)) {
         String s = accidentalType2MusicXmlString(acc->accidentalType());
         if (!s.empty()) {
             XmlWriter::Attributes attrs;
             if (s == "other") {
                 attrs = { { "smufl", accidentalType2SmuflMusicXmlString(acc->accidentalType()) } };
+            }
+            if (!acc->visible()) {
+                attrs.emplace_back(std::make_pair("print-object", "no"));
             }
             String tag = tagName;
             if (acc->bracket() == AccidentalBracket::BRACKET) {

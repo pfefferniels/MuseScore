@@ -202,6 +202,7 @@ public:
     const std::set<int>& pageStartMeasureNrs() const { return m_pageStartMeasureNrs; }
     bool hasBeamingInfo() const { return m_hasBeamingInfo; }
     bool hasAllSystemBreaks() const { return m_hasAllSystemBreaks; }
+    bool hasAllAccidentals() const { return m_hasAllAccidentals; }
     bool isVocalStaff(const muse::String& partId) const { return m_parts.at(partId).isVocalStaff(); }
     bool isPercussionStaff(const muse::String& partId) const { return m_parts.at(partId).isPercussionStaff(); }
     static engraving::VBox* createAndAddVBoxForCreditWords(engraving::Score* score, engraving::Fraction tick);
@@ -242,6 +243,7 @@ private:
     muse::String m_errors;                             // Errors to present to the user
     bool m_hasBeamingInfo = false;               // Whether the score supports or contains beaming info
     bool m_hasAllSystemBreaks = false;           // Whether the encoding declares that every system break is given
+    bool m_hasAllAccidentals = false;            // Whether the encoding declares that every printed accidental is given
     bool m_hasInferredHeaderText = false;
 
     // part specific data (TODO: move to part-specific class)
