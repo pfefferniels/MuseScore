@@ -162,11 +162,10 @@ def measure_length(measure: ET.Element, times: list[int]) -> int:
 
 
 def is_trailing(measure: ET.Element, index: int) -> bool:
-    """No note or forward in any voice starts at or after the element, so it takes effect where the next measure
-    starts. A note of another voice that follows after a backup but starts earlier does not count."""
-    children, times = list(measure), child_times(measure)
-    return not any(c.tag in ("note", "forward") and times[i] >= times[index]
-                   for i, c in enumerate(children) if i > index)
+    """No note or forward in any voice sounds at or after the element, so it takes effect where the next measure
+    starts. A note of another voice that starts earlier but lasts beyond the element keeps it in this measure."""
+    times = child_times(measure)
+    return times[index] >= measure_length(measure, times)
 
 
 @dataclass
