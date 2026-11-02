@@ -7619,7 +7619,7 @@ Note* MusicXmlParserPass2::note(const String& partId,
 
     // check for timing error(s) and set dura
     // keep in this order as checkTiming() might change dura
-    String errorStr = mnd.checkTiming(type, rest, grace);
+    String errorStr = mnd.checkTiming(type, rest, grace, printObject);
     dura = mnd.duration();
     if (!errorStr.empty()) {
         m_logger->logError(errorStr, &m_e);

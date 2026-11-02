@@ -3418,6 +3418,7 @@ void MusicXmlParserPass1::note(const String& partId,
         notePrintSpacingNo(dura);
         return;
     }
+    const bool printObject = m_e.asciiAttribute("print-object") != "no";
 
     //float alter = 0;
     bool chord = false;
@@ -3513,7 +3514,7 @@ void MusicXmlParserPass1::note(const String& partId,
 
     // check for timing error(s) and set dura
     // keep in this order as checkTiming() might change dura
-    String errorStr = mnd.checkTiming(type, bRest, grace);
+    String errorStr = mnd.checkTiming(type, bRest, grace, printObject);
     dura = mnd.duration();
     if (!errorStr.empty()) {
         m_logger->logError(errorStr, &m_e);

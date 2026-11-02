@@ -112,7 +112,7 @@ static Fraction calculateFraction(const String& type, const int dots, const Frac
  Return empty string if OK, message in case of error.
  */
 
-String MusicXmlNoteDuration::checkTiming(const String& type, const bool rest, const bool grace)
+String MusicXmlNoteDuration::checkTiming(const String& type, const bool rest, const bool grace, const bool printObject)
 {
     //LOGD("type %s rest %d grace %d", muPrintable(type), rest, grace);
     String errorStr;
@@ -134,7 +134,11 @@ String MusicXmlNoteDuration::checkTiming(const String& type, const bool rest, co
                        .arg(m_calcDura.toString(), m_specDura.toString());
             //LOGD("rest %d type '%s' timemod %s", rest, muPrintable(type), muPrintable(_timeMod.print()));
 
-            if (rest && type == "whole" && m_specDura.isValid()) {
+            if (rest && !printObject && m_calcDura < m_specDura) {
+                // an unprinted rest only moves the time on, like <forward>: its <duration> counts, its <type> is not drawn
+                errorStr = u"";
+                m_dura = m_specDura;
+            } else if (rest && type == "whole" && m_specDura.isValid()) {
                 // Sibelius whole measure rest (not an error)
                 errorStr = u"";
                 m_dura = m_specDura;

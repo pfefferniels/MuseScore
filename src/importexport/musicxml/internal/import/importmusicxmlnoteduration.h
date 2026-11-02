@@ -43,7 +43,7 @@ class MusicXmlNoteDuration
 public:
     MusicXmlNoteDuration(int divs, MusicXmlLogger* logger, MusicXmlParserPass1* pass1)
         : m_divs(divs), m_pass1(pass1), m_logger(logger) { /* nothing so far */ }
-    muse::String checkTiming(const muse::String& type, const bool rest, const bool grace);
+    muse::String checkTiming(const muse::String& type, const bool rest, const bool grace, const bool printObject = true);
     engraving::Fraction duration() const { return m_dura; } // duration to use
     engraving::Fraction calculatedDuration() const { return m_calcDura; }   // value calculated from note type etcetera
     engraving::Fraction specifiedDuration() const { return m_specDura; }    // value read from the duration element
