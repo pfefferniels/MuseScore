@@ -12,7 +12,7 @@ fix commits touch only `src/` and `fonts/` and can be cherry-picked without the 
 | 2 | Redundant accidentals exported as `cautionary="yes" parentheses="no"` | fixed (behaviour change, see below) | `6f6f33c9` |
 | 3 | Melisma end markers lost on export | fixed for single and end syllables | `0f041017` |
 | 4 | Cue size lost on export (notes, clefs) | fixed; clefs by a heuristic | `3b27395c`, `68e4e8db`, `69814b49` |
-| 5 | `staff-size`/`staff-type` without effect, not exported | fixed, except repro 08 | `712ea6cf`, `b97579b2` |
+| 5 | `staff-size`/`staff-type` without effect, not exported | fixed (repro 08 later, at your request) | `712ea6cf`, `b97579b2`, `fd0da259` |
 | 6 | Cue clef at a page start drawn as header clef | not reproduced, no change | none |
 | 7 | Tie stop without start | fixed (needs a small engraving change) | `d364e083` |
 | 8 | Slashed figured-bass digits shown as "?" | fixed | `42f1ced6` |
@@ -20,9 +20,11 @@ fix commits touch only `src/` and `fonts/` and can be cherry-picked without the 
 | 10 | Exit crash after conversion | not reproduced on Linux | none |
 | – | Converter crashed on every MusicXML export on this branch | fixed (prerequisite) | `f75a44e9` |
 | – | Clef change at the end of a bar drawn after the barline (asked for after the first report) | fixed | `8a698c0f`, `3f4853fc` |
+| – | Accidentals that the file leaves out (repro 12, asked for after the clef fixes) | fixed where the encoding declares complete accidentals | `f8b45faa` |
+| – | Transposition per staff (repro 13, asked for after the clef fixes) | fixed (engraving and file format addition) | `82ee3a65` |
 
-`musicxml_tests`: 364 tests before, 386 after, all passing at every commit. `engraving_tests` (900 tests) also pass
-after the engraving change in `d364e083`.
+`musicxml_tests`: 364 tests before, 393 after, all passing at every commit. `engraving_tests` (900 tests) also pass
+after the engraving changes in `d364e083` and `82ee3a65`.
 
 ## Build and environment
 
@@ -74,10 +76,11 @@ All conversions exited with code 0.
 ### Checker, lost/gained per category
 
 `run_roundtrip.py --no-render` over the 12 parts. Cells are lost/gained, empty where the category does not occur in
-the part. Both tables use the checker as updated in `6ec431d8` (see "Clef changes at the end of a bar"); the baseline
-outputs were checked again with it. Dynamics are 0/0 in both runs and left out. Tied is left out of the final table because it is 0/0 in every
-part (the lone tie stops of defect 7), and break because it is 0/0 in every part (every printed system and page
-break comes back).
+the part. Both tables use the current checker, with the changes `6ec431d8` (see "Clef changes at the end of a bar"),
+`acce74bf` (defect 5) and `baf3327e` (see "Untested items"); the baseline outputs were checked again with it.
+Dynamics are 0/0 in both runs and left out. The final table leaves out tied (the lone tie stops of defect 7), break
+(every printed system and page break comes back) and transpose (the per-staff transpositions of ob1 and ob2),
+because they are 0/0 in every part.
 
 Baseline:
 
@@ -88,8 +91,8 @@ Baseline:
 | fl2 | 72/71 | 0/1 | 0/2 | 27/16 | 1/0 | 34/7 | 555/558 |  | 0/0 |  | 8/5 |
 | gamba | 43/40 | 2/2 | 0/1 | 2/0 | 0/0 | 229/46 | 45/45 | 7/30 | 0/0 |  | 3/3 |
 | liuto | 13/11 | 2/0 | 0/1 | 1/0 | 0/0 | 12/6 | 18/116 | 3/0 | 0/0 |  | 2/2 |
-| ob1 | 82/78 | 2/2 | 1/1 | 25/15 | 2/2 | 6/3 | 558/560 | 6/36 | 1/0 | 2/1 | 11/7 |
-| ob2 | 105/102 | 4/3 | 2/7 | 30/16 | 3/4 | 4/2 | 547/550 | 10/0 | 1/0 | 2/1 | 11/7 |
+| ob1 | 82/78 | 2/2 | 1/1 | 25/15 | 2/2 | 6/3 | 558/560 | 6/36 | 1/0 | 2/2 | 15/11 |
+| ob2 | 105/102 | 4/3 | 2/7 | 30/16 | 3/4 | 4/2 | 547/550 | 10/0 | 1/0 | 2/2 | 11/7 |
 | va | 89/89 | 0/2 | 6/14 | 42/25 | 2/0 | 0/0 | 644/644 |  | 2/0 |  | 6/4 |
 | vadam1 | 32/27 | 1/0 | 0/1 | 1/0 | 0/0 | 120/42 | 18/17 | 2/0 | 0/0 |  | 1/1 |
 | vadam2 | 39/35 | 1/0 | 1/2 | 2/1 | 0/0 | 116/40 | 18/17 | 2/0 | 0/0 |  | 1/1 |
@@ -98,20 +101,20 @@ Baseline:
 
 Final:
 
-| part | accidental | barline | clef | key | lyric | note | staff-details | transpose | words |
-|---|---|---|---|---|---|---|---|---|---|
-| bc | 0/1 | 21/1 | 2/0 | 2/2 | 4/5 | 8/9 | 0/0 |  | 5/5 |
-| fl1 | 0/0 | 0/1 | 0/0 | 1/0 | 30/9 | 2/3 |  |  | 8/5 |
-| fl2 | 0/0 | 0/1 | 1/1 | 1/0 | 28/5 | 2/5 |  |  | 8/5 |
-| gamba | 0/0 | 2/2 | 0/0 | 0/0 | 0/0 | 2/2 | 1/1 |  | 3/3 |
-| liuto | 0/0 | 2/0 | 0/0 | 0/0 | 0/0 | 0/99 | 0/0 |  | 2/2 |
-| ob1 | 0/1 | 2/2 | 0/0 | 2/2 | 2/1 | 6/8 | 0/0 | 2/1 | 11/7 |
-| ob2 | 0/1 | 4/3 | 2/0 | 3/4 | 2/1 | 5/8 | 0/0 | 2/1 | 11/7 |
-| va | 0/2 | 0/2 | 0/0 | 2/0 | 0/0 | 5/5 |  |  | 6/4 |
-| vadam1 | 0/0 | 1/0 | 0/0 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
-| vadam2 | 0/0 | 1/0 | 0/0 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
-| vn1 | 0/0 | 1/1 | 0/0 | 1/0 | 0/0 | 4/4 | 0/4 |  | 8/6 |
-| vn2 | 0/0 | 1/2 | 0/0 | 2/0 | 0/0 | 1/1 | 0/0 |  | 10/7 |
+| part | accidental | barline | clef | key | lyric | note | staff-details | words |
+|---|---|---|---|---|---|---|---|---|
+| bc | 0/1 | 21/1 | 2/0 | 2/2 | 4/5 | 8/9 | 0/0 | 1/1 |
+| fl1 | 0/0 | 0/1 | 0/0 | 1/0 | 30/9 | 2/3 |  | 8/5 |
+| fl2 | 0/0 | 0/1 | 1/1 | 1/0 | 28/5 | 2/5 |  | 8/5 |
+| gamba | 0/0 | 2/2 | 0/0 | 0/0 | 0/0 | 2/2 | 1/1 | 2/2 |
+| liuto | 0/0 | 2/0 | 0/0 | 0/0 | 0/0 | 0/99 | 0/0 | 2/2 |
+| ob1 | 0/1 | 2/2 | 0/0 | 2/2 | 2/1 | 6/8 | 0/0 | 8/4 |
+| ob2 | 0/0 | 4/3 | 2/0 | 3/4 | 2/1 | 5/8 | 0/0 | 8/4 |
+| va | 0/0 | 0/2 | 0/0 | 2/0 | 0/0 | 5/5 |  | 6/4 |
+| vadam1 | 0/0 | 1/0 | 0/0 | 0/0 | 27/2 | 0/0 | 0/2 | 1/1 |
+| vadam2 | 0/0 | 1/0 | 0/0 | 0/0 | 27/2 | 0/0 | 0/2 | 1/1 |
+| vn1 | 0/0 | 1/1 | 0/0 | 1/0 | 0/0 | 4/4 | 0/4 | 5/3 |
+| vn2 | 0/0 | 1/2 | 0/0 | 2/0 | 0/0 | 1/1 | 0/0 | 7/4 |
 
 For gamba, the brief's 4.7.4 numbers were accidental 43/40, lyric 229/46, note 45/45, staff-details 8/31, break 1/2,
 words 3/4, barline 2/2. The baseline here matches them closely. The final gamba differences are listed under the
@@ -133,17 +136,21 @@ defects below.
 | 05c-cue-clef-page-break-defaults | clef 1/1, note 3/3 | equal |
 | 06-lone-tie-stop | note 1/1, tied 1/0 | equal |
 | 07-figured-bass-slash | equal | equal |
-| 08-direction-hidden-staff | staff-details 1/0 | staff-details 1/0 |
+| 08-direction-hidden-staff | staff-details 1/0, words 1/1 | equal |
 | 09-cue-clef-page-break-excerpt | clef 1/1, note 25/25 | equal |
 | 10-tuplet-hidden-number-bracket | equal | equal |
 | 11-notehead-parentheses | equal | equal |
 | 12-alter-without-accidental | accidental 0/1 | accidental 0/1 |
-| 13-per-staff-transpose | key 1/0, transpose 2/1 | key 1/0, transpose 2/1 |
-| 14-words-hidden-staff-mmrest | (added at the end) | equal, but the words on staff 1 are not drawn |
+| 12b-alter-without-accidental-declared | accidental 0/1 | equal |
+| 13-per-staff-transpose | key 1/0, transpose 1/1 | equal |
+| 13b-per-staff-transpose-three-staves | transpose 2/2 | equal |
+| 14-words-hidden-staff-mmrest | staff-details 2/0, words 1/1 | equal |
 
-04/04b became equal with the clef fixes below, 08 is explained under defect 5, and 10 to 13 under "Untested items". I looked at
-the PNGs of 01, 03, 04 and 09 from the final build, of 02, 06 and 07 from the build of the commit that fixed them,
-and of 13 from the baseline. Repros 10 to 13 are new (commit `ea9417c3`).
+04/04b became equal with the clef fixes below, 08 is explained under defect 5, 10 to 13 under "Untested items", and
+14 under "Lower priority items". I looked at the PNGs of 01, 03, 04, 09, 13b and 14 from the final build, of 02, 06
+and 07 from the build of the commit that fixed them, and of 13 from the baseline. Repros 10 to 13 are new (commit
+`ea9417c3`), 12b (`abfb32dc`) and 13b (`915847f5`) were added with the later fixes. The baseline column was
+rechecked with the current checker, which changes 08, 13 and 14 against the first report.
 
 ## Defects
 
@@ -168,7 +175,8 @@ Tests: `courtesyAccidentals` (import, `testCourtesyAccidentals_ref.mscx`), plus 
 `courtesyAccidentalsRoundTrip` added with defect 2. The test file is repro 03 plus a voice unison bar and a tie across
 the barline.
 
-Checker: repro 03 accidental 5/2 → equal. Parts: no accidental is lost any more in any part (gamba 43/40 → 0/0, bc 265/245 → 0/1). Five accidentals are gained in all parts together (bc, ob1, ob2, va): places where MuseScore draws an accidental that the print omits.
+Checker: repro 03 accidental 5/2 → equal. Parts: no accidental is lost any more in any part (gamba 43/40 → 0/0, bc 265/245 → 0/1). Five accidentals were gained in all parts together (bc, ob1, ob2, va): places where MuseScore draws an accidental
+that the print omits. `f8b45faa` (see "Untested items") hides three of them; bc and ob1 still gain one each.
 
 Unsure: in the voice-unison case the accidental is drawn and exported on the first voice although the file prints it
 on the second. The checker counts per staff, so it does not show this.
@@ -238,7 +246,7 @@ Remaining in gamba: two grace cue notes that the parts encode as `<grace/><cue/>
 grace size, while MuseScore draws such notes at grace-cue size. If reduced cue grace notes are meant, `grace-cue` is
 the matching value in the encoding (8 notes in the parts).
 
-### 5. `staff-size` and `staff-type`: fixed, except repro 08
+### 5. `staff-size` and `staff-type`: fixed (repro 08 later)
 
 Cause: `staffDetails()` set `MAG` 1.0 and `LINE_DISTANCE` 0.75 for `<staff-size>75</staff-size>` without `scaling`. In
 4.7.4, `Staff::setProperty` had no case for `LINE_DISTANCE`, so the value was dropped and the staff drawn at full size
@@ -267,9 +275,17 @@ and `print-object` is written only where a staff is hidden or shown again. Gamba
 Tests: `staffSizeCue1` (checks small, mag and line distance), `staffSizeCue2`, `staffSizeCue3`, `hiddenCueStaff`,
 `hiddenCueStaffRoundTrip`.
 
-Not fixed: repro 08. The staff with `print-object="no"` carries a words direction, so `Measure::isEmpty` is false and
-MuseScore shows the staff, as the brief accepts. Export then has no reason to write `print-object="no"`. Exporting it
-anyway would contradict what MuseScore draws; I left it. Remaining staff-details differences in the parts (for example
+Repro 08, fixed after the clef fixes at your request (`fd0da259`): the staff with `print-object="no"` carries a words
+direction, so `Measure::isEmpty` was false and MuseScore showed the whole staff in that system. Inside a multimeasure
+rest it was the other way round: the staff was hidden together with its text (repro 14, see "Lower priority items").
+The print shows the text and not the staff. After import, text on a staff that is not printed at that point and has
+no notes in the measure now moves to the nearest printed staff of the part, preferring the one below, and export
+writes it there. `acce74bf` makes the checker count such text on that printed staff in both files, since that is
+where the print shows it; otherwise each moved text would count as lost and gained. Tests: `wordsHiddenStaff1`
+(import) and `wordsHiddenStaff2` (export), from repro 14. Risk: text that belongs to the hidden staff (for example a
+cue instrument's name) now belongs to the player's staff, and stays there when the staff is shown again in MuseScore.
+
+Remaining staff-details differences in the parts (for example
 vn1 0/4, vadam1/2 0/2) are systems in which MuseScore hides an empty cue staff that the print shows, or the reverse;
 MuseScore decides visibility by emptiness.
 
@@ -464,24 +480,78 @@ Changed reference files, with the commit that changed them:
 - `c20c6b6f` (system locks only): the 24 files listed under defect 9.
 - `8a698c0f`, `3f4853fc`: none changed; new `testClefMultiRestEnd.mscx`, `testClefMultiRestEnd_ref.xml`,
   `testClefMeasureEnd.xml`, `testClefMeasureEnd_ref.mscx`, `testClefMeasureEnd_ref.xml`.
+- `fd0da259`: none changed; new `testWordsHiddenStaff.xml` (repro 14), `testWordsHiddenStaff_ref.mscx`,
+  `testWordsHiddenStaff_ref.xml`.
+- `f8b45faa`: `testBackupRoundingError_ref.mscx` (42 accidentals now invisible, see "Untested items"); new
+  `testAlterWithoutAccidental.xml`, `testAlterWithoutAccidental_ref.mscx`, `testAlterWithoutAccidental_ref.xml`.
+- `82ee3a65`: none changed; new `testPerStaffTranspose.xml`, `testPerStaffTranspose_ref.mscx`,
+  `testPerStaffTranspose_ref.xml`.
 
 No input file of an existing test was changed.
 
 ## Untested items
 
-Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
+Repros 10 to 13, 12b and 13b (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
 
 - `<tuplet show-number="none" bracket="no">` (10): kept. The checker does not compare it; I checked the exported
   `<tuplet>` element.
 - `<notehead parentheses="yes">` (11): kept, checked in the output.
-- `<alter>` without `<accidental>` (12): MuseScore draws the accidental where the key requires one (F♯ in C major) and
-  none where it does not (F♯ in G major), and writes the drawn one as `<accidental>` on export, which the checker
-  counts as gained. MusicXML leaves the display of a missing `<accidental>` to the reader, so I do not consider this a
-  defect.
-- Per-staff `<transpose number="n">` (13): MuseScore has one transposition per part (instrument). Import takes one of
-  the two, export writes it for the whole part, and the key of staff 2 (`<key number="2">`) is not exported. The notes
-  are drawn as written, but a re-import transposes staff 2 like staff 1. This is a limitation of MuseScore's model; I
-  did not change it. ob1 and ob2 show it as transpose 2/1 in the tables.
+- `<alter>` without `<accidental>` (12, 12b), fixed later at your request for encodings that declare complete
+  accidentals (`f8b45faa`): MuseScore draws the accidental where the key requires one (F♯ in C major) and none where
+  it does not (F♯ in G major), and writes the drawn one as `<accidental>` on export, which the checker counts as
+  gained. MusicXML leaves the display of a missing `<accidental>` to the reader, unless the encoding declares
+  `<supports element="accidental" type="yes"/>`: then the print has no accidental there. With that declaration,
+  import now gives such a note an invisible accidental, so layout draws none. Import also reads `print-object="no"`
+  on `<accidental>`. Export skips an invisible accidental, or writes it with `print-object="no"` when invisible
+  elements are exported; before, it was exported as a visible one. Repro 12b (the declared variant) is equal; repro 12
+  without the declaration still gains the drawn F♯, as intended. All 12 parts declare complete accidentals; the
+  commit removed three of the five gained accidentals in the parts (ob2, va). Tests: `alterWithoutAccidental1`
+  (import) and `alterWithoutAccidental2` (export). Changed reference: `testBackupRoundingError_ref.mscx`, where 42
+  accidentals are now invisible. That file was exported by MuseScore 0.7.0 in 2007, declares complete accidentals
+  and still leaves out accidentals that its key requires (for example A natural in D♭ major). **Risk:** files from
+  exporters that make the declaration without giving every accidental lose these accidentals in the drawing (the
+  pitches are unchanged). Current MuseScore always writes the declaration and writes every drawn accidental.
+- Per-staff `<transpose number="n">` (13, 13b), fixed later at your request (`82ee3a65`). In ob1 and ob2 the
+  part has three staves: staff 1 for oboe da caccia in F (−4/−7), staff 2 for oboe d'amore in A (−2/−3) and staff 3
+  for oboe in C without `<transpose>`. MuseScore had one transposition per part, the instrument's, so import used the
+  first one (F) for all three staves. The notes were drawn as written, but staves 2 and 3 sounded and were spelled as
+  if in F, export wrote one `<transpose>` for the whole part, and keys given per staff were partly lost.
+  When I asked you how to proceed, I described this as "a staff written at concert pitch next to a transposing staff",
+  from repro 13. The parts need any interval per staff, so the change is a general per-staff transposition, of which
+  concert pitch (0/0) is one case.
+
+  Engraving: a staff can have its own transposition (`Staff::transposeOverride()`, an optional interval), which
+  replaces the instrument's for that staff in the places that turn written into sounding pitch: note pitch and
+  spelling (`Note::transposition`, `tpc2default`, note entry), key signatures (`Staff::transpose`, key changes,
+  `adjustKeySigs`), chord symbols, the Transpose command, switching concert pitch, parts and copy and paste. It is
+  copied to the staves of parts and saved in `.mscx` as `<transposeOverride diatonic="-2" chromatic="-3"/>` inside
+  `<Staff>`, **a file format addition**. There is no user interface for it.
+
+  MusicXML: import sets it on each staff whose transposition differs from the instrument's (the first transposition
+  in the part). Under the spec, a staff without `<transpose number>` in a part with numbered ones has no
+  transposition, so it becomes a staff at concert pitch. The concert key of such a staff follows from its own
+  transposition. Export writes one `<transpose number="n">` per staff when a staff has its own transposition (in
+  concert pitch mode `<for-part number="n">`), and at the start of the score it now writes the key of every staff
+  when the keys differ, also for a staff without a key signature of its own (the C major of a concert staff).
+
+  The checker compared `<transpose>` elements, not staves, so the tables showed ob1 as transpose 2/1 and did not show
+  that staff 3 had turned into an F staff. `baf3327e` compares one transposition per staff: a `<transpose>` without
+  number counts for every staff, and in a part with numbered ones a staff without one counts as 0/0. The baseline
+  tables above were rechecked with it.
+
+  Result: repros 13 and 13b equal (baseline key 1/0 and transpose 1/1, and transpose 2/2); ob1 and ob2 transpose
+  2/2 → 0/0. Tests, on a file with staves in F, in A and without transposition: `perStaffTranspose1` (import; the
+  reference `.mscx` has the `<transposeOverride>`), `perStaffTranspose2` (export with per-staff `<transpose>` and
+  `<key>`), `perStaffTranspose3` (reads the `.mscx` back, checks the sounding pitches and the keys of all three staves
+  before and after switching to concert pitch).
+
+  Limitations: the transposition of a staff is fixed for the whole score, so import takes per-staff transpositions
+  only from the start of the part; a later `<transpose number>` is treated as before, as a change for the whole part
+  (the parts have none). Code that asks the instrument directly still uses the instrument's transposition
+  for every staff: instrument changes and replacing the instrument (both re-transpose the notes), the score's key
+  list (`Score::keyList`), tablature string data, and the MEI export and the other importers. **Upstream would need
+  to agree on the model.** The
+  alternative, one part per instrument, would change the part structure on export.
 
 ## Lower priority items
 
@@ -500,9 +570,10 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
     `Measure::isEmpty()` returns true at once for a multimeasure rest (`src/engraving/dom/measure.cpp:2283`), before
     the check for annotations, so the staff text no longer keeps the staff visible. Minimal repro:
     `repro/14-words-hidden-staff-mmrest.musicxml` (hand-written; with the final build the text on staff 1 is missing,
-    and two controls, without multirest or with staff 1 visible, draw it). **Not fixed**: the fix is in engraving
-    layout (count the annotations of the multimeasure rest, or of the measures it covers), and I left it for a separate
-    change.
+    and two controls, without multirest or with staff 1 visible, draw it). Fixed by `fd0da259` (see defect 5)
+    at import: the text moves to the printed staff, so `Measure::isEmpty()` no longer matters for it. Repro 14 is
+    equal and the text is drawn on staff 2. The layout behaviour itself is unchanged and still affects MuseScore
+    scores that hide a staff with text inside a multirest.
 
 ## Other problems found (not fixed)
 
@@ -510,13 +581,20 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
   of staves 2 and 3 twice each, ob2 bar 44 has three clefs on staff 3 at the same instant (G, G and a cue F), and in
   fl2 bar 18 voice 1 lasts only half the bar, so MuseScore fills it with a rest after the clef.
 - MuseScore fills gaps in voices with rests (liuto note 0/99): the checker counts them as gained notes.
-- Jump texts (Da capo, al Fine, tacet) are exported on staff 1 of the part (gamba words 3/3).
+- Jump texts (Da capo, al Fine, tacet) are exported on staff 1 of the part (gamba words 2/2, bc 1/1).
 - Barline differences in several parts (for example bc 21/1) were not investigated.
 - The exported `<millimeters>` is rounded, so positions drift by 0.01 tenths on a round trip (see defect 9).
 - Figured bass: MuseScore reads and writes `cross` and `backslash`, while MusicXML uses `plus`, `back-slash` and
   `vertical`, so these standard values are lost on import.
 - `<defaults>` `system-distance` and `top-system-distance` are not mapped to styles; this could be a follow-up to
   defect 9.
+- Restated keys: the importer adds a key signature only where the key of that staff changes (`addKey`). A `<key>`
+  for all staves that repeats the key of one staff (for example ob1 measure-index 992, staff 2) therefore comes back
+  as keys for the other staves only.
+- A key change at the end of a measure (after the last note, as in ob1 bar 56 and ob2 at measure-index 698) is
+  imported into a key signature segment at the end of that measure, and export looks for key signatures only at the
+  start of a measure, so it is lost. This looks like the end-of-bar clef case and probably needs the same kind of fix.
+  Together with the restated keys it accounts for the key differences in ob1 and ob2.
 
 ## Open questions
 
@@ -528,6 +606,10 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
    declared).
 5. The encoding of the 8 grace cue notes (`size="cue"` versus `grace-cue`) and the `staff-layout` numbering in bc and
    ob2.
+6. Per-staff transposition: is a transposition per staff (saved in `.mscx`) the model you want to propose upstream,
+   or would you rather import such a part as one part per instrument?
+7. Accidentals left out of a declared-complete encoding are now hidden (`f8b45faa`). Is relying on the declaration
+   acceptable, given old or careless exporters that declare it anyway?
 
 ## Deviations from the brief
 
@@ -539,5 +621,8 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
   rests, part of defect 4's checker numbers), `b97579b2` (print-object, part of defect 5) and `0e8d165a` (tied-over
   accidentals, part of defect 1). Defect 4 is split into three commits so that the clef heuristic can be dropped on its
   own. Added after the first report, at your request: `c20c6b6f` (system locks), `8a698c0f` and `3f4853fc` (clefs
-  at the end of a bar), and the checker change `6ec431d8`.
+  at the end of a bar), and the checker change `6ec431d8`. Added after the clef fixes, at your request:
+  `fd0da259` (text on hidden staves), `f8b45faa` (accidentals the file leaves out), `82ee3a65` (transposition per
+  staff), the checker changes `acce74bf` and `baf3327e`, and the repros 12b (`abfb32dc`) and 13b
+  (`915847f5`).
 - I did not run `tools/codestyle/tidy_file.sh` with upstream's uncrustify version (see "Build and environment").
