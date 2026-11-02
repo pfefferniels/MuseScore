@@ -1798,6 +1798,16 @@ TEST_F(MusicXml_Tests, wordsMixedItalic1) {
 TEST_F(MusicXml_Tests, wordsMixedItalic2) {
     musicXmlIoTestRef("testWordsMixedItalic");
 }
+TEST_F(MusicXml_Tests, wordsEndOfMeasure1) {
+    musicXmlImportTestRef("testWordsEndOfMeasure");
+}
+TEST_F(MusicXml_Tests, wordsEndOfMeasure2) {
+    musicXmlIoTestRef("testWordsEndOfMeasure");
+}
+TEST_F(MusicXml_Tests, wordsEndOfMeasure3) {
+    // the same score saved and read back has the texts in a time tick segment
+    musicXmlMscxExportTestRef("testWordsEndOfMeasureSaved");
+}
 TEST_F(MusicXml_Tests, wordsHiddenStaff1) {
     musicXmlImportTestRef("testWordsHiddenStaff");
 }

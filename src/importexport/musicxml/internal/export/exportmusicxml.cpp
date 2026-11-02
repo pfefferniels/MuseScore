@@ -8386,15 +8386,20 @@ void ExportMusicXml::writeInstrumentDetails(const Part* part, const Instrument* 
 static void annotationsWithoutNote(ExportMusicXml* exp, const track_idx_t strack, const int staves, const Measure* const measure)
 {
     for (Segment* segment = measure->first(); segment; segment = segment->next()) {
-        if (segment->segmentType() == SegmentType::ChordRest) {
+        // a score file read back has the annotations at the end of a measure in a time tick segment,
+        // which the tracks of the measure do not write
+        const bool endTimeTick = segment->isTimeTickType() && segment->tick() == measure->endTick();
+        if (segment->segmentType() == SegmentType::ChordRest || endTimeTick) {
             for (const EngravingItem* element : segment->annotations()) {
                 if (!element->isFiguredBass() && !element->isHarmony()) {               // handled elsewhere
                     if (!exp->canWrite(element)) {
                         continue;
                     }
                     const track_idx_t wtrack = findTrackForAnnotations(element->track(), segment);           // track to write annotation
-                    if (strack <= element->track() && element->track() < (strack + VOICES * staves) && wtrack == muse::nidx) {
-                        commonAnnotations(exp, element, staves > 1 ? 1 : 0);
+                    if (strack <= element->track() && element->track() < (strack + VOICES * staves)
+                        && (wtrack == muse::nidx || endTimeTick)) {
+                        const staff_idx_t partStaff = track2staff(element->track()) - track2staff(strack);
+                        commonAnnotations(exp, element, staves > 1 ? partStaff + 1 : 0);
                     }
                 }
             }
