@@ -6710,13 +6710,16 @@ void MusicXmlParserPass2::key(const String& partId, Measure* measure, const Frac
         }
         return staffKey;
     };
+    // a key after the last note of a measure takes effect at the start of the next one, where layout moves it anyway;
+    // left at the end of the last measure of a multimeasure rest, it is neither drawn nor exported
+    Measure* keyMeasure = (tick >= measure->endTick() && measure->nextMeasure()) ? measure->nextMeasure() : measure;
     if (keyno == -1) {
         // apply key to all staves in the part
         for (staff_idx_t i = 0; i < nstaves; ++i) {
-            addKey(keyForStaff(staffIdx + i), keyColor, printObject, m_score, measure, staffIdx + i, tick);
+            addKey(keyForStaff(staffIdx + i), keyColor, printObject, m_score, keyMeasure, staffIdx + i, tick);
         }
     } else if (keyno < static_cast<int>(nstaves)) {
-        addKey(keyForStaff(staffIdx + keyno), keyColor, printObject, m_score, measure, staffIdx + keyno, tick);
+        addKey(keyForStaff(staffIdx + keyno), keyColor, printObject, m_score, keyMeasure, staffIdx + keyno, tick);
     }
 }
 

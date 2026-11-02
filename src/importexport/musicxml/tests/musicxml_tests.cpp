@@ -1023,6 +1023,13 @@ TEST_F(MusicXml_Tests, jumpsOtherStaff1) {
 TEST_F(MusicXml_Tests, jumpsOtherStaff2) {
     musicXmlIoTestRef("testJumpsOtherStaff");
 }
+TEST_F(MusicXml_Tests, keyMeasureEnd1) {
+    musicXmlImportTestRef("testKeyMeasureEnd");
+}
+TEST_F(MusicXml_Tests, keyMeasureEnd2) {
+    // a key at the end of the last measure of a multimeasure rest
+    musicXmlIoTestRef("testKeyMeasureEnd");
+}
 TEST_F(MusicXml_Tests, keysig1) {
     musicXmlIoTest("testKeysig1");
 }
