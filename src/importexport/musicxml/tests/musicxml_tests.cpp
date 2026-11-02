@@ -533,6 +533,9 @@ TEST_F(MusicXml_Tests, cueNotes2) {
 TEST_F(MusicXml_Tests, cueNotes3) {
     musicXmlImportTestRef("testCueNotes3");
 }
+TEST_F(MusicXml_Tests, cueRests) {
+    musicXmlIoTestRef("testCueRests");
+}
 TEST_F(MusicXml_Tests, dalSegno) {
     musicXmlIoTest("testDalSegno");
 }

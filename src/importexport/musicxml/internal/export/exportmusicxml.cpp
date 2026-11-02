@@ -4580,6 +4580,11 @@ void ExportMusicXml::rest(Rest* rest, staff_idx_t staff, const std::vector<Lyric
     }
     m_xml.startElementRaw(noteTag);
 
+    // a rest does not play, so a small one is taken to be part of a cue
+    if (rest->isSmall()) {
+        m_xml.tag("cue");
+    }
+
     int yOffsSt   = 0;
     int oct       = 0;
     int stp       = 0;

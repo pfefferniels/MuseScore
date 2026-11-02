@@ -7317,7 +7317,7 @@ Note* MusicXmlParserPass2::note(const String& partId,
             } else {
                 cr->setBeamMode(BeamMode::NONE);
             }
-            cr->setSmall(isSmall);
+            cr->setSmall(isSmall || cue);
             colorItem(cr, noteColor);
             cr->setVisible(printObject);
             handleDisplayStep(cr, mnp.displayStep(), mnp.displayOctave(), noteStartTime, m_score->style().spatium());

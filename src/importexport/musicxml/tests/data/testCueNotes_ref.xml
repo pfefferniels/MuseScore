@@ -128,6 +128,7 @@
         <duration>4</duration>
         </backup>
       <note>
+        <cue/>
         <rest/>
         <duration>1</duration>
         <voice>5</voice>
