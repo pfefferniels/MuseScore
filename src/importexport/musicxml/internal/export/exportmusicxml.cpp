@@ -403,6 +403,7 @@ private:
     void findAndExportClef(const Measure* const m, const int staves, const track_idx_t strack, const track_idx_t etrack);
     void exportDefaultClef(const Part* const part, const Measure* const m);
     void writeElement(EngravingItem* el, const Measure* m, staff_idx_t sstaff, bool useDrumset);
+    void writeSignature(const EngravingItem* el, staff_idx_t sstaff);
     void writeMeasureTracks(const Measure* const m, const int partIndex, const staff_idx_t strack, const staff_idx_t partRelStaffNo,
                             const bool useDrumset, const bool isLastStaffOfPart, FigBassMap& fbMap,
                             std::set<const Spanner*>& spannersStopped);
@@ -8048,6 +8049,52 @@ static bool tickIsInMiddleOfMeasure(const Fraction ti, const Measure* m)
 }
 
 //---------------------------------------------------------
+//  isSharedByPart
+//---------------------------------------------------------
+
+/**
+ Whether every staff of the part has the same key or time signature as \a el at its tick,
+ so that it is written once, without number, as at the start of a measure.
+ */
+
+static bool isSharedByPart(const EngravingItem* el)
+{
+    const Part* part = el->part();
+    if (part->nstaves() < 2) {
+        return false;
+    }
+    const Segment* seg = el->isKeySig() ? toKeySig(el)->segment() : toTimeSig(el)->segment();
+    for (const Staff* staff : part->staves()) {
+        const EngravingItem* other = seg->element(staff->idx() * VOICES);
+        if (!other || other->type() != el->type() || other->generated() || other->visible() != el->visible()) {
+            return false;
+        }
+        if (el->isKeySig() ? toKeySig(other)->key() != toKeySig(el)->key() : !(toTimeSig(other)->sig() == toTimeSig(el)->sig())) {
+            return false;
+        }
+    }
+    return true;
+}
+
+//---------------------------------------------------------
+//  writeSignature
+//---------------------------------------------------------
+
+/**
+ Write the key or time signature \a el for staff \a sstaff (0 for all staves).
+ */
+
+void ExportMusicXml::writeSignature(const EngravingItem* el, staff_idx_t sstaff)
+{
+    if (el->isKeySig()) {
+        const KeySig* ks = toKeySig(el);
+        keysig(ks, ks->staff()->clef(ks->tick()), sstaff);
+    } else {
+        timesig(toTimeSig(el), sstaff);
+    }
+}
+
+//---------------------------------------------------------
 //  isCueClef
 //---------------------------------------------------------
 
@@ -8144,7 +8191,18 @@ void ExportMusicXml::writeElement(EngravingItem* el, const Measure* m, staff_idx
         if (tickIsInMiddleOfMeasure(barln->tick(), m)) {
             barlineMiddle(barln);
         }
-    } else if (el->isKeySig() || el->isTimeSig() || el->isBreath() || el->isTimeTickAnchor()) {
+    } else if (el->isKeySig() || el->isTimeSig()) {
+        // keysigTimesig() writes the ones at the start of the measure, write a change inside it here
+        const Segment* seg = el->isKeySig() ? toKeySig(el)->segment() : toTimeSig(el)->segment();
+        const SegmentType changeType = el->isKeySig() ? SegmentType::KeySig : SegmentType::TimeSig;
+        if (!el->generated() && seg->isType(changeType) && tickIsInMiddleOfMeasure(seg->tick(), m)) {
+            if (!isSharedByPart(el)) {
+                writeSignature(el, sstaff);
+            } else if (el->staffIdx() == el->part()->staff(0)->idx()) {
+                writeSignature(el, 0);
+            }
+        }
+    } else if (el->isBreath() || el->isTimeTickAnchor()) {
         // handled elsewhere
     } else {
         LOGD("ExportMusicXml::write unknown segment type %s", el->typeName());

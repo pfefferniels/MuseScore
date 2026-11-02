@@ -1394,6 +1394,13 @@ TEST_F(MusicXml_Tests, sibOttavas) {
 TEST_F(MusicXml_Tests, sibRitLine) {
     musicXmlImportTestRef("testSibRitLine");
 }
+TEST_F(MusicXml_Tests, signaturesInMeasure1) {
+    musicXmlImportTestRef("testSignaturesInMeasure");
+}
+TEST_F(MusicXml_Tests, signaturesInMeasure2) {
+    // a key and time change inside a measure
+    musicXmlIoTestRef("testSignaturesInMeasure");
+}
 TEST_F(MusicXml_Tests, slurTieDirection) {
     musicXmlIoTest("testSlurTieDirection");
 }
