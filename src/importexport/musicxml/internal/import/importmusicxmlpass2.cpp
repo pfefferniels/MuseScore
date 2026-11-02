@@ -6581,7 +6581,8 @@ void MusicXmlParserPass2::clef(const String& partId, Measure* measure, const Fra
         }
     } else {
         s = measure->getSegment(tick.isNotZero() ? SegmentType::Clef : SegmentType::HeaderClef, tick);
-        if (measure->prevMeasure() && !measure->prevMeasure()->repeatEnd()) {
+        // only a clef at the start of the measure follows the barline; one at its end stays before the next barline
+        if (tick == measure->tick() && measure->prevMeasure() && !measure->prevMeasure()->repeatEnd()) {
             position = ClefToBarlinePosition::AFTER;
         }
     }

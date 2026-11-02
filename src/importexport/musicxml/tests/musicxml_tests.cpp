@@ -500,6 +500,12 @@ TEST_F(MusicXml_Tests, chordSymbols) {
 TEST_F(MusicXml_Tests, chordSymbols2) {
     musicXmlImportTestRef("testChordSymbols2");
 }
+TEST_F(MusicXml_Tests, clefMeasureEnd1) {
+    musicXmlImportTestRef("testClefMeasureEnd");
+}
+TEST_F(MusicXml_Tests, clefMeasureEnd2) {
+    musicXmlIoTestRef("testClefMeasureEnd");
+}
 TEST_F(MusicXml_Tests, clefMultiRestEnd) {
     musicXmlMscxExportTestRef("testClefMultiRestEnd");
 }
