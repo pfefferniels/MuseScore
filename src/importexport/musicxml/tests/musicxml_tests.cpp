@@ -23,7 +23,9 @@
 #include <gtest/gtest.h>
 
 #include "engraving/engravingerrors.h"
+#include "draw/fontmetrics.h"
 #include "engraving/dom/chord.h"
+#include "engraving/dom/figuredbass.h"
 #include "engraving/dom/jump.h"
 #include "engraving/dom/marker.h"
 #include "engraving/dom/masterscore.h"
@@ -684,6 +686,35 @@ TEST_F(MusicXml_Tests, figuredBass3) {
 }
 TEST_F(MusicXml_Tests, figuredBassDivisions) {
     musicXmlIoTest("testFiguredBassDivisions");
+}
+TEST_F(MusicXml_Tests, figuredBassSlashedDigits) {
+    MasterScore* score = readScore(XML_IO_DATA_DIR + u"testFiguredBassSlash.xml");
+    ASSERT_TRUE(score);
+
+    const FiguredBassFont& fbFont = FiguredBass::FBFonts().at(0);
+    const muse::draw::FontMetrics fm(muse::draw::Font(fbFont.family, muse::draw::Font::Type::Tablature));
+
+    int digit = 0;
+    for (Segment* s = score->firstSegment(SegmentType::ChordRest); s; s = s->next1(SegmentType::ChordRest)) {
+        for (EngravingItem* e : s->annotations()) {
+            if (!e->isFiguredBass()) {
+                continue;
+            }
+            for (const FiguredBassItem* fi : toFiguredBass(e)->items()) {
+                ++digit;
+                EXPECT_EQ(fi->digit(), digit);
+                EXPECT_EQ(fi->suffix(), FiguredBassItem::Modifier::SLASH);
+                const String& text = fi->ldata()->displayText;
+                ASSERT_EQ(text.size(), 1u) << "digit " << digit;
+                EXPECT_NE(text.at(0), Char(u'?')) << "digit " << digit;
+                EXPECT_NE(text.at(0), Char(char16_t(u'0' + digit))) << "digit " << digit;
+                EXPECT_TRUE(fm.inFont(text.at(0).unicode())) << "digit " << digit;
+            }
+        }
+    }
+    EXPECT_EQ(digit, 9);
+
+    delete score;
 }
 TEST_F(MusicXml_Tests, finaleDynamics) {
     musicXmlImportTestRef("testFinaleDynamics");

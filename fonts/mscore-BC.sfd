@@ -654,7 +654,7 @@ WinInfo: 0 12 10
 BeginPrivate: 0
 EndPrivate
 TeXData: 1 0 0 353280 176640 117760 0 1048576 117760 783286 444596 497025 792723 393216 433062 380633 303038 157286 324010 404750 52429 2506097 1059062 262144
-BeginChars: 65541 82
+BeginChars: 65541 91
 
 StartChar: .notdef
 Encoding: 65536 -1 0
@@ -4085,6 +4085,105 @@ Fore
 Refer: 4 43 S 1 0 0 1 683 -1 2
 Refer: 5 48 N 1 0 0 1 0 0 2
 Validated: 32769
+EndChar
+
+StartChar: uniE216
+Encoding: 57878 57878 82
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 5 48 N 1 0 0 1 0 0 2
+EndChar
+
+StartChar: uniE217
+Encoding: 57879 57879 83
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 6 49 N 1 0 0 1 0 0 2
+EndChar
+
+StartChar: uniE218
+Encoding: 57880 57880 84
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 7 50 N 1 0 0 1 0 0 2
+EndChar
+
+StartChar: uniE219
+Encoding: 57881 57881 85
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 8 51 N 1 0 0 1 0 0 2
+EndChar
+
+StartChar: uniE21A
+Encoding: 57882 57882 86
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 9 52 N 1 0 0 1 0 0 2
+EndChar
+
+StartChar: uniE21B
+Encoding: 57883 57883 87
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 11 54 N 1 0 0 1 0 0 2
+EndChar
+
+StartChar: uniE21C
+Encoding: 57884 57884 88
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 12 55 N 1 0 0 1 0 0 2
+EndChar
+
+StartChar: uniE21D
+Encoding: 57885 57885 89
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 13 56 N 1 0 0 1 0 0 2
+EndChar
+
+StartChar: uniE21E
+Encoding: 57886 57886 90
+Width: 700
+VWidth: 1639
+Flags: W
+LayerCount: 2
+Fore
+Refer: 24 47 N 1 0 0 1 -14 0 2
+Refer: 14 57 N 1 0 0 1 0 0 2
 EndChar
 EndChars
 EndSplineFont
