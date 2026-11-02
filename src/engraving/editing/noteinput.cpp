@@ -158,7 +158,7 @@ NoteVal NoteInput::noteVal(const Score* score, int pitch, staff_idx_t staffIdx, 
     }
 
     bool concertPitch = score->style().styleB(Sid::concertPitch);
-    Interval v = st->part()->instrument(score->inputState().tick())->transpose();
+    Interval v = st->transposeOverride().value_or(st->part()->instrument(score->inputState().tick())->transpose());
 
     // If an accidental is set in the input state, use it as a hint for the pitch spelling
     if (AccidentalType at = score->inputState().accidentalType(); at == AccidentalType::FLAT || at == AccidentalType::SHARP) {
@@ -285,7 +285,7 @@ NoteVal NoteInput::noteValForPosition(const Score* score, Position pos, Accident
         if (score->style().styleB(Sid::concertPitch)) {
             nval.tpc1 = step2tpc(step % 7, acci);
         } else {
-            nval.pitch += instr->transpose().chromatic;
+            nval.pitch += st->transposeOverride().value_or(instr->transpose()).chromatic;
             nval.tpc2 = step2tpc(step % 7, acci);
             Interval v = st->transpose(tick);
             if (v.isZero()) {
@@ -986,7 +986,7 @@ Ret NoteInput::repitchNote(Transaction& tx, Score* score, const Position& p, boo
         if (score->style().styleB(Sid::concertPitch)) {
             nval.tpc1 = step2tpc(step % 7, acci);
         } else {
-            nval.pitch += st->part()->instrument(s->tick())->transpose().chromatic;
+            nval.pitch += st->transposeOverride().value_or(st->part()->instrument(s->tick())->transpose()).chromatic;
             nval.tpc2 = step2tpc(step % 7, acci);
         }
     }

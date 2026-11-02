@@ -251,7 +251,7 @@ void RealizeChordSymbols::realizeChordSymbols(Transaction&, Score* score, bool l
         } else {
             //generate notes list based on overridden settings
             int offset = 0;
-            Interval interval = h->staff()->part()->instrument(h->tick())->transpose();
+            Interval interval = h->staff()->transposeOverride().value_or(h->staff()->part()->instrument(h->tick())->transpose());
             if (!concertPitch) {
                 offset = interval.chromatic;
             }

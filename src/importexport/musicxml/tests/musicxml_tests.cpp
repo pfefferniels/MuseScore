@@ -32,12 +32,16 @@
 #include "engraving/dom/measure.h"
 #include "engraving/dom/note.h"
 #include "engraving/dom/page.h"
+#include "engraving/dom/part.h"
+#include "engraving/dom/instrument.h"
 #include "engraving/dom/partialtie.h"
 #include "engraving/dom/rangelock.h"
 #include "engraving/dom/segment.h"
 #include "engraving/dom/staff.h"
 #include "engraving/dom/stafftype.h"
 #include "engraving/dom/system.h"
+#include "engraving/editing/transaction/transaction.h"
+#include "engraving/editing/transpose.h"
 
 #include "settings.h"
 #include "importexport/musicxml/imusicxmlconfiguration.h"
@@ -1262,6 +1266,34 @@ TEST_F(MusicXml_Tests, perStaffTranspose3) {
         EXPECT_EQ(score->staff(staff)->key(m2->tick()), Key::G) << "staff " << staff;
     }
     EXPECT_EQ(toChord(seg2->element(2 * VOICES))->upNote()->tpc(), Tpc::TPC_F_S);
+
+    delete score;
+}
+TEST_F(MusicXml_Tests, perStaffTranspose4) {
+    // changing the instrument's transposition (instrument change, replace instrument) leaves staves with their own
+    MasterScore* score = readScore(XML_IO_DATA_DIR + u"testPerStaffTranspose_ref.mscx");
+    ASSERT_TRUE(score);
+    Part* part = score->parts().front();
+    const Interval oldInterval = part->instrument()->transpose();
+    ASSERT_EQ(oldInterval, Interval(-4, -7));
+
+    score->startCmd(TranslatableString::untranslatable("MusicXML tests"));
+    part->instrument()->setTranspose(Interval(-1, -2)); // F to B flat
+    Transpose::transpositionChanged(score->transactionManager()->currentOrDummyTransaction(), score, part,
+                                    Part::MAIN_INSTRUMENT_TICK, oldInterval);
+    score->endCmd();
+
+    const Measure* m1 = score->firstMeasure();
+    const Segment* seg1 = m1->first(SegmentType::ChordRest);
+    for (staff_idx_t staff = 0; staff < 3; ++staff) {
+        EXPECT_EQ(toChord(seg1->element(staff * VOICES))->upNote()->pitch(), 72) << "staff " << staff;
+    }
+    EXPECT_EQ(toChord(seg1->element(0))->upNote()->tpc(), Tpc::TPC_D);
+    EXPECT_EQ(toChord(seg1->element(VOICES))->upNote()->tpc(), Tpc::TPC_E_B);
+    EXPECT_EQ(toChord(seg1->element(2 * VOICES))->upNote()->tpc(), Tpc::TPC_C);
+    EXPECT_EQ(score->staff(0)->key(m1->tick()), Key::D);
+    EXPECT_EQ(score->staff(1)->key(m1->tick()), Key::E_B);
+    EXPECT_EQ(score->staff(2)->key(m1->tick()), Key::C);
 
     delete score;
 }

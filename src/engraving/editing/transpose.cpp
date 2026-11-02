@@ -436,13 +436,14 @@ void Transpose::transpositionChanged(Transaction& tx, Score* score, Part* part, 
         if (tickEnd != Fraction(-1, 1) && s->tick() >= tickEnd) {
             break;
         }
-        Interval v = part->staff(0)->transpose(s->tick());
-        v.flip();
-        Interval diffV(oldV.diatonic + v.diatonic, oldV.chromatic + v.chromatic);
         for (Staff* st : part->staves()) {
-            if (st->staffType(tickStart)->group() == StaffGroup::PERCUSSION) {
+            // a staff with its own transposition is not affected by the instrument's
+            if (st->staffType(tickStart)->group() == StaffGroup::PERCUSSION || st->transposeOverride()) {
                 continue;
             }
+            Interval v = st->transpose(s->tick());
+            v.flip();
+            Interval diffV(oldV.diatonic + v.diatonic, oldV.chromatic + v.chromatic);
             track_idx_t t1 = st->idx() * VOICES;
             track_idx_t t2 = t1 + VOICES;
             for (track_idx_t track = t1; track < t2; ++track) {
@@ -618,6 +619,9 @@ void Transpose::transposeFretDiagram(Transaction& tx, FretDiagram* diagram, Scor
     Part* part = diagram->part();
     Instrument* instrument = part ? part->instrument(tick) : nullptr;
     Interval iv = instrument ? instrument->transpose() : Interval(0, 0);
+    if (staff && staff->transposeOverride()) {
+        iv = *staff->transposeOverride();
+    }
 
     Interval hInterval((interval.diatonic - kv.diatonic + iv.diatonic), (interval.chromatic - kv.chromatic + iv.chromatic));
 

@@ -401,7 +401,7 @@ void EditEnharmonicSpelling::spellWithSharpsOrFlats(Score* score, Prefer prefer)
 
     std::vector<Note*> notes = score->selection().noteList();
     for (Note* note : notes) {
-        Interval interval = note->part()->instrument(note->chord()->tick())->transpose();
+        Interval interval = note->staff()->transposeOverride().value_or(note->part()->instrument(note->chord()->tick())->transpose());
         int tpc1 = TPC_INVALID;
         int tpc2 = TPC_INVALID;
         if (note->staff()->concertPitch() || interval.isZero()) {
@@ -479,7 +479,7 @@ void EditEnharmonicSpelling::changeEnharmonicSpelling(Score* score, bool both)
         }
 
         note->undoSetTpc(tpc);
-        if (both || staff->part()->instrument(note->chord()->tick())->transpose().isZero()) {
+        if (both || staff->transposeOverride().value_or(staff->part()->instrument(note->chord()->tick())->transpose()).isZero()) {
             int transposedTpc = note->transposeTpc(tpc);
             if (note->concertPitch()) {
                 note->undoChangeProperty(Pid::TPC2, transposedTpc);

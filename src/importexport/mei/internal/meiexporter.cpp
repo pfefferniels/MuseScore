@@ -1377,7 +1377,7 @@ bool MeiExporter::writeNote(const Note* note, const Chord* chord, const Staff* s
         return false;
     }
 
-    Interval interval = staff->part()->instrument()->transpose();
+    Interval interval = staff->instrumentTranspose();
     auto [meiNote, meiAccid] = Convert::pitchToMEI(note, note->accidental(), interval);
     m_currentNode = m_currentNode.append_child();
     if (!isChord) {

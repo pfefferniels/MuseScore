@@ -2435,8 +2435,9 @@ KeyList Score::keyList() const
         }
     }
     Key normalizedC = Key::C;
+    const int firstStaffTranspose = firstStaff ? firstStaff->instrumentTranspose().chromatic : 0;
     bool needNormalize = firstStaff && !masterScore()->style().styleB(Sid::concertPitch)
-                         && (firstStaff->part()->instrument()->transpose().chromatic || firstStaff->part()->instruments().size() > 1);
+                         && (firstStaffTranspose || firstStaff->part()->instruments().size() > 1);
     // normalize the keyevents to concert pitch if necessary
     KeyList nkl;
     for (auto key : tmpKeymap) {
@@ -2448,9 +2449,8 @@ KeyList Score::keyList() const
             nkl.insert(key);
         }
     }
-    if (firstStaff && !masterScore()->style().styleB(Sid::concertPitch)
-        && (firstStaff->part()->instrument()->transpose().chromatic || firstStaff->part()->instruments().size() > 1)) {
-        int interval = firstStaff->part()->instrument()->transpose().chromatic;
+    if (needNormalize) {
+        int interval = firstStaffTranspose;
         normalizedC = Transpose::transposeKey(normalizedC, interval);
     }
 

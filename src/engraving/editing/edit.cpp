@@ -1212,7 +1212,7 @@ void Score::deleteItem(EngravingItem* el)
             Key cKey = k->staff()->keySigEvent(k->tick()).concertKey();
             Key tKey = cKey;
             if (!style().styleB(Sid::concertPitch)) {
-                Interval v = k->part()->instrument(k->tick())->transpose();
+                Interval v = k->staff()->transposeOverride().value_or(k->part()->instrument(k->tick())->transpose());
                 v.flip();
                 tKey = Transpose::transposeKey(cKey, v, k->part()->preferSharpFlat());
             }
@@ -1816,7 +1816,7 @@ void Score::deleteMeasures(MeasureBase* mbStart, MeasureBase* mbEnd, bool preser
                 } else {
                     nkse = lastDeletedKeySigEvents.at(staffIdx);
                     if (!concertPitch && !nkse.isAtonal()) {
-                        Interval v = instrument->transpose();
+                        Interval v = staff->transposeOverride().value_or(instrument->transpose());
                         v.flip();
                         nkse.setKey(Transpose::transposeKey(nkse.concertKey(), v, part->preferSharpFlat()));
                     }
@@ -2893,7 +2893,7 @@ void Score::restoreInitialKeySigAndTimeSig()
         Key transposedKey = concertKey;
         const Part* part = staff->part();
         const Instrument* instrument = part->instrument();
-        int transpose = -instrument->transpose().chromatic;
+        int transpose = -staff->transposeOverride().value_or(instrument->transpose()).chromatic;
         if (!concertPitch) {
             transposedKey = Transpose::transposeKey(transposedKey, transpose, part->preferSharpFlat());
         }
@@ -3822,7 +3822,8 @@ void Score::updateInstrumentChangeTranspositions(KeySigEvent& key, Staff* staff,
                     e.setConcertKey(Key::C);
                 } else {
                     e.setMode(key.mode());
-                    Interval transposeInterval = staff->part()->instrument(Fraction::fromTicks(nextTick))->transpose();
+                    Interval transposeInterval
+                        = staff->transposeOverride().value_or(staff->part()->instrument(Fraction::fromTicks(nextTick))->transpose());
                     transposeInterval.flip();
                     Key ckey = key.concertKey();
                     Key nkey = Transpose::transposeKey(ckey, transposeInterval, staff->part()->preferSharpFlat());

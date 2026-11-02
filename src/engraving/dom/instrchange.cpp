@@ -121,7 +121,8 @@ void InstrumentChange::setupInstrument(const Instrument* instrument, bool update
     // Change key signature if necessary. CAUTION: not necessary in case of octave-transposing!
     if ((v.chromatic - oldV.chromatic) % 12) {
         for (size_t i = 0; i < part->nstaves(); i++) {
-            if (!part->staff(i)->keySigEvent(tickStart).isAtonal()) {
+            // a staff with its own transposition is not affected by the instrument's
+            if (!part->staff(i)->keySigEvent(tickStart).isAtonal() && !part->staff(i)->transposeOverride()) {
                 KeySigEvent ks;
                 // Check, if some key signature is already there, if no, mark new one "for instrument change"
                 Segment* seg = segment()->prev1(SegmentType::KeySig);

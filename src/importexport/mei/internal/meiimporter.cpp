@@ -2061,7 +2061,7 @@ bool MeiImporter::readNote(pugi::xml_node noteNode, Measure* measure, int track,
     }
 
     Staff* staff = m_score->staff(track2staff(track));
-    Interval interval = staff->part()->instrument()->transpose();
+    Interval interval = staff->instrumentTranspose();
 
     Convert::PitchStruct pitchSt = Convert::pitchFromMEI(meiNote, meiAccid, interval, warning);
     if (warning) {
@@ -3465,7 +3465,12 @@ bool MeiImporter::buildScoreParts(pugi::xml_node scoreDefNode)
         }
         staff->staffType(Fraction(0, 1))->setInvisible(staffSt.invisible);
         staff->staffType(Fraction(0, 1))->setUserMag(staffSt.scale / 100);
-        part->instrument()->setTranspose(staffSt.interval);
+        // the first staff of a part sets the instrument's transposition, a later one that differs gets its own
+        if (part->nstaves() == 0) {
+            part->instrument()->setTranspose(staffSt.interval);
+        } else if (!(staffSt.interval == part->instrument()->transpose())) {
+            staff->setTransposeOverride(staffSt.interval);
+        }
 
         m_score->appendStaff(staff);
     }

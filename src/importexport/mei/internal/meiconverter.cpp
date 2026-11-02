@@ -3097,7 +3097,7 @@ libmei::StaffDef Convert::staffToMEI(const engraving::Staff* staff)
     // @n
     meiStaffDef.SetN(static_cast<int>(staff->idx() + 1));
     // @trans.*
-    const engraving::Interval& interval = staff->part()->instrument()->transpose();
+    const engraving::Interval interval = staff->instrumentTranspose();
     if (!interval.isZero()) {
         meiStaffDef.SetTransDiat(interval.diatonic);
         meiStaffDef.SetTransSemi(interval.chromatic);
