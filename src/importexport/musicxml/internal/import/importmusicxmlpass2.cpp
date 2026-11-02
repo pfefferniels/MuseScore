@@ -2155,6 +2155,7 @@ void MusicXmlParserPass2::scorePartwise()
     }
     addError(checkAtEndElement(m_e, u"score-partwise"));
 
+    showAccidentalsIfDeclarationUnreliable();
     moveTextFromHiddenStaves();
     addVerticalLayout();
     lockPrintedSystems();
@@ -2600,14 +2601,18 @@ static void handleBeamAndStemDir(ChordRest* cr, const BeamMode bm, const Directi
  staff the way layout does, grace notes included. Notes sounding at the same time
  are checked against the state before them, as the file may print the accidental
  on any of them. If the file gives every printed accidental, add an invisible one
- where layout would show an accidental that the file does not print.
+ where layout would show an accidental that the file does not print, and collect it
+ in \a hidden. Count in \a neededGiven the accidentals the file prints where layout
+ would show one too.
  */
 
 static void markUserAccidentals(const staff_idx_t firstStaff,
                                 const size_t staves,
                                 const Measure* measure,
                                 const std::map<Note*, int>& alterMap,
-                                const bool hideUnprinted)
+                                const bool hideUnprinted,
+                                std::vector<Accidental*>& hidden,
+                                size_t& neededGiven)
 {
     const Score* score = measure->score();
     const track_idx_t startTrack = firstStaff * VOICES;
@@ -2641,6 +2646,8 @@ static void markUserAccidentals(const staff_idx_t firstStaff,
                         nt->accidental()->setRole(AccidentalRole::USER);
                     } else if ((prevAccVal == noteAccVal || tiedOver) && Accidental::subtype2value(accType) == noteAccVal) {
                         nt->accidental()->setRole(AccidentalRole::USER);
+                    } else if (prevAccVal != noteAccVal) {
+                        ++neededGiven;
                     }
                 } else if (hideUnprinted && pitched && !nt->accidental() && prevAccVal != noteAccVal && !tiedOver
                            && !muse::contains(printedLines, line)) {
@@ -2649,6 +2656,7 @@ static void markUserAccidentals(const staff_idx_t firstStaff,
                                                   ? AccidentalType::NATURAL : Accidental::value2subtype(noteAccVal));
                     accidental->setVisible(false);
                     nt->add(accidental);
+                    hidden.push_back(accidental);
                 }
                 currAcc.setAccidentalVal(line, noteAccVal);
             }
@@ -3094,7 +3102,8 @@ void MusicXmlParserPass2::measure(const String& partId, const Fraction time)
 
     // mark superfluous accidentals as user accidentals
     const staff_idx_t scoreRelStaff = m_score->staffIdx(part);
-    markUserAccidentals(scoreRelStaff, part->nstaves(), measure, alterMap, m_pass1.hasAllAccidentals());
+    markUserAccidentals(scoreRelStaff, part->nstaves(), measure, alterMap, m_pass1.hasAllAccidentals(), m_hiddenAccidentals,
+                        m_neededAccidentalsGiven);
 
     // multi-measure rest handling
     if (getAndDecMultiMeasureRestCount() == 0) {
@@ -3257,6 +3266,30 @@ bool MusicXmlParserPass2::isStaffPrinted(const staff_idx_t staffIdx, const Fract
     }
     auto it = changes->second.upper_bound(tick);
     return it == changes->second.begin() || std::prev(it)->second;
+}
+
+//---------------------------------------------------------
+//   showAccidentalsIfDeclarationUnreliable
+//---------------------------------------------------------
+
+/**
+ An encoding that declares to give every printed accidental, but leaves out more
+ of the accidentals that key and preceding notes require than it gives, does not
+ mean the declaration (some exporters write it regardless). Remove the invisible
+ accidentals added for it, so that layout shows these accidentals.
+ */
+
+void MusicXmlParserPass2::showAccidentalsIfDeclarationUnreliable()
+{
+    static constexpr size_t MIN_OMITTED = 5;   // a few omissions are editorial, not a sign of an unreliable declaration
+    if (m_hiddenAccidentals.size() < MIN_OMITTED || m_hiddenAccidentals.size() <= m_neededAccidentalsGiven) {
+        return;
+    }
+    for (Accidental* accidental : m_hiddenAccidentals) {
+        accidental->note()->remove(accidental);
+        delete accidental;
+    }
+    m_hiddenAccidentals.clear();
 }
 
 //---------------------------------------------------------

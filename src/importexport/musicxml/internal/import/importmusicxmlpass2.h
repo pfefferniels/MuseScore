@@ -458,6 +458,7 @@ private:
     void staffLayout(const muse::String& partId, engraving::Measure* measure);
     void addVerticalLayout();
     bool isStaffPrinted(engraving::staff_idx_t staffIdx, const engraving::Fraction& tick) const;
+    void showAccidentalsIfDeclarationUnreliable();
     void moveTextFromHiddenStaves();
     void lockPrintedSystems();
     void setMeasureRepeats(const engraving::staff_idx_t scoreRelStaff, engraving::Measure* measure);
@@ -561,6 +562,8 @@ private:
     };
     std::map<engraving::Fraction, PrintedSystemLayout> m_systemLayouts;  // by measure tick
     std::map<engraving::staff_idx_t, std::map<engraving::Fraction, bool> > m_staffPrinted;   // print-object changes
+    std::vector<engraving::Accidental*> m_hiddenAccidentals;   // added where an encoding with all accidentals prints none
+    size_t m_neededAccidentalsGiven = 0;                       // printed accidentals that layout shows as well
 };
 
 //---------------------------------------------------------
