@@ -6579,22 +6579,22 @@ static void addSymToSig(KeySigEvent& sig, const String& step, const String& alte
  Add a KeySigEvent to the score.
  */
 
+static bool keyChanges(const KeySigEvent& key, const Score* score, const staff_idx_t staffIdx, const Fraction& tick)
+{
+    // TODO only if different custom key ?
+    return score->staff(staffIdx)->key(tick) != key.key() || key.custom() || key.isAtonal();
+}
+
 static void addKey(const KeySigEvent key, const Color keyColor, const bool printObj, Score* score,
                    Measure* measure, const staff_idx_t staffIdx, const Fraction& tick)
 {
-    Key oldkey = score->staff(staffIdx)->key(tick);
-    // TODO only if different custom key ?
-    if (oldkey != key.key() || key.custom() || key.isAtonal()) {
-        // new key differs from key in effect at this tick
-        Segment* s = measure->getSegment(SegmentType::KeySig, tick);
-        KeySig* keysig = Factory::createKeySig(s);
-        keysig->setTrack(staffIdx * VOICES);
-        keysig->setKeySigEvent(key);
-        keysig->setVisible(printObj);
-        colorItem(keysig, keyColor);
-        s->add(keysig);
-        //currKeySig->setKeySigEvent(key);
-    }
+    Segment* s = measure->getSegment(SegmentType::KeySig, tick);
+    KeySig* keysig = Factory::createKeySig(s);
+    keysig->setTrack(staffIdx * VOICES);
+    keysig->setKeySigEvent(key);
+    keysig->setVisible(printObj);
+    colorItem(keysig, keyColor);
+    s->add(keysig);
 }
 
 //---------------------------------------------------------
@@ -6714,12 +6714,20 @@ void MusicXmlParserPass2::key(const String& partId, Measure* measure, const Frac
     // left at the end of the last measure of a multimeasure rest, it is neither drawn nor exported
     Measure* keyMeasure = (tick >= measure->endTick() && measure->nextMeasure()) ? measure->nextMeasure() : measure;
     if (keyno == -1) {
-        // apply key to all staves in the part
+        // apply key to all staves in the part; like a key added to the part in MuseScore, a change of any staff
+        // restates the key on the staves that have it already
+        bool changes = false;
         for (staff_idx_t i = 0; i < nstaves; ++i) {
+            changes = changes || keyChanges(keyForStaff(staffIdx + i), m_score, staffIdx + i, tick);
+        }
+        for (staff_idx_t i = 0; i < nstaves && changes; ++i) {
             addKey(keyForStaff(staffIdx + i), keyColor, printObject, m_score, keyMeasure, staffIdx + i, tick);
         }
     } else if (keyno < static_cast<int>(nstaves)) {
-        addKey(keyForStaff(staffIdx + keyno), keyColor, printObject, m_score, keyMeasure, staffIdx + keyno, tick);
+        const KeySigEvent staffKey = keyForStaff(staffIdx + keyno);
+        if (keyChanges(staffKey, m_score, staffIdx + keyno, tick)) {
+            addKey(staffKey, keyColor, printObject, m_score, keyMeasure, staffIdx + keyno, tick);
+        }
     }
 }
 

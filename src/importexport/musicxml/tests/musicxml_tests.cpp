@@ -1030,6 +1030,13 @@ TEST_F(MusicXml_Tests, keyMeasureEnd2) {
     // a key at the end of the last measure of a multimeasure rest
     musicXmlIoTestRef("testKeyMeasureEnd");
 }
+TEST_F(MusicXml_Tests, keyRestated1) {
+    musicXmlImportTestRef("testKeyRestated");
+}
+TEST_F(MusicXml_Tests, keyRestated2) {
+    // a key for all staves that only changes some of them
+    musicXmlIoTestRef("testKeyRestated");
+}
 TEST_F(MusicXml_Tests, keysig1) {
     musicXmlIoTest("testKeysig1");
 }
