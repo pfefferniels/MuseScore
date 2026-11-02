@@ -16,11 +16,11 @@ fix commits touch only `src/` and `fonts/` and can be cherry-picked without the 
 | 6 | Cue clef at a page start drawn as header clef | not reproduced, no change | none |
 | 7 | Tie stop without start | fixed (needs a small engraving change) | `d364e083` |
 | 8 | Slashed figured-bass digits shown as "?" | fixed | `42f1ced6` |
-| 9 | Printed vertical layout ignored | fixed for the vertical distances; pages still overflow where MuseScore wraps printed systems | `3f4ac40e` |
+| 9 | Printed vertical layout ignored | fixed: all 12 parts have the printed systems and page count | `3f4ac40e`, `c20c6b6f` |
 | 10 | Exit crash after conversion | not reproduced on Linux | none |
 | – | Converter crashed on every MusicXML export on this branch | fixed (prerequisite) | `f75a44e9` |
 
-`musicxml_tests`: 364 tests before, 382 after, all passing at every commit. `engraving_tests` (900 tests) also pass
+`musicxml_tests`: 364 tests before, 383 after, all passing at every commit. `engraving_tests` (900 tests) also pass
 after the engraving change in `d364e083`.
 
 ## Build and environment
@@ -53,20 +53,20 @@ repository. The outputs stayed in the session's scratch directory.
 
 `mscore -o <part>.pdf <part>.musicxml`, counted with `pdfinfo`. "Printed" and "4.7.4" are from `PROMPT.md`.
 
-| part | printed | 4.7.4 (macOS) | baseline | final |
-|---|---|---|---|---|
-| bc | 53 | 55 | 55 | 53 |
-| fl1 | 22 | 22 | 22 | 22 |
-| fl2 | 20 | 20 | 20 | 20 |
-| gamba | 6 | 7 | 6 | 6 |
-| liuto | 2 | 2 | 2 | 2 |
-| ob1 | 20 | 21 | 21 | 20 |
-| ob2 | 18 | 20 | 20 | 19 |
-| va | 22 | 28 | 29 | 25 |
-| vadam1 | 4 | 4 | 4 | 4 |
-| vadam2 | 4 | 5 | 5 | 4 |
-| vn1 | 28 | 29 | 29 | 30 |
-| vn2 | 23 | 26 | 26 | 26 |
+| part | printed | 4.7.4 (macOS) | baseline | spacers only (`3f4ac40e`) | final |
+|---|---|---|---|---|---|
+| bc | 53 | 55 | 55 | 53 | 53 |
+| fl1 | 22 | 22 | 22 | 22 | 22 |
+| fl2 | 20 | 20 | 20 | 20 | 20 |
+| gamba | 6 | 7 | 6 | 6 | 6 |
+| liuto | 2 | 2 | 2 | 2 | 2 |
+| ob1 | 20 | 21 | 21 | 20 | 20 |
+| ob2 | 18 | 20 | 20 | 19 | 18 |
+| va | 22 | 28 | 29 | 25 | 22 |
+| vadam1 | 4 | 4 | 4 | 4 | 4 |
+| vadam2 | 4 | 5 | 5 | 4 | 4 |
+| vn1 | 28 | 29 | 29 | 30 | 28 |
+| vn2 | 23 | 26 | 26 | 26 | 23 |
 
 All conversions exited with code 0.
 
@@ -74,7 +74,8 @@ All conversions exited with code 0.
 
 `run_roundtrip.py --no-render` over the 12 parts. Cells are lost/gained, empty where the category does not occur in
 the part. Dynamics are 0/0 in both runs and left out. Tied is left out of the final table because it is 0/0 in every
-part (the lone tie stops of defect 7).
+part (the lone tie stops of defect 7), and break because it is 0/0 in every part (every printed system and page
+break comes back).
 
 Baseline:
 
@@ -95,20 +96,20 @@ Baseline:
 
 Final:
 
-| part | accidental | barline | break | clef | key | lyric | note | staff-details | transpose | words |
-|---|---|---|---|---|---|---|---|---|---|---|
-| bc | 0/1 | 21/1 | 0/4 | 8/6 | 2/2 | 4/5 | 8/9 | 0/0 |  | 5/5 |
-| fl1 | 0/0 | 0/1 | 0/1 | 19/8 | 1/0 | 30/9 | 2/3 |  |  | 8/5 |
-| fl2 | 0/0 | 0/1 | 0/2 | 18/7 | 1/0 | 28/5 | 2/5 |  |  | 8/5 |
-| gamba | 0/0 | 2/2 | 0/0 | 2/0 | 0/0 | 0/0 | 2/2 | 1/1 |  | 3/3 |
-| liuto | 0/0 | 2/0 | 0/1 | 1/0 | 0/0 | 0/0 | 0/99 | 0/1 |  | 2/2 |
-| ob1 | 0/1 | 2/2 | 0/0 | 18/8 | 3/3 | 2/1 | 6/8 | 0/0 | 2/1 | 11/7 |
-| ob2 | 0/1 | 4/3 | 1/6 | 24/10 | 3/4 | 2/1 | 5/8 | 0/0 | 2/1 | 11/7 |
-| va | 0/2 | 0/2 | 2/10 | 29/12 | 2/0 | 0/0 | 5/5 |  |  | 6/4 |
-| vadam1 | 0/0 | 1/0 | 0/0 | 1/0 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
-| vadam2 | 0/0 | 1/0 | 0/0 | 2/1 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
-| vn1 | 0/0 | 1/1 | 1/12 | 26/12 | 1/0 | 0/0 | 4/4 | 0/4 |  | 8/6 |
-| vn2 | 0/0 | 1/2 | 2/11 | 27/12 | 2/0 | 0/0 | 1/1 | 0/0 |  | 10/7 |
+| part | accidental | barline | clef | key | lyric | note | staff-details | transpose | words |
+|---|---|---|---|---|---|---|---|---|---|
+| bc | 0/1 | 21/1 | 8/6 | 2/2 | 4/5 | 8/9 | 0/0 |  | 5/5 |
+| fl1 | 0/0 | 0/1 | 19/8 | 1/0 | 30/9 | 2/3 |  |  | 8/5 |
+| fl2 | 0/0 | 0/1 | 18/7 | 1/0 | 28/5 | 2/5 |  |  | 8/5 |
+| gamba | 0/0 | 2/2 | 2/0 | 0/0 | 0/0 | 2/2 | 1/1 |  | 3/3 |
+| liuto | 0/0 | 2/0 | 1/0 | 0/0 | 0/0 | 0/99 | 0/0 |  | 2/2 |
+| ob1 | 0/1 | 2/2 | 18/8 | 3/3 | 2/1 | 6/8 | 0/0 | 2/1 | 11/7 |
+| ob2 | 0/1 | 4/3 | 24/10 | 3/4 | 2/1 | 5/8 | 0/0 | 2/1 | 11/7 |
+| va | 0/2 | 0/2 | 29/12 | 2/0 | 0/0 | 5/5 |  |  | 6/4 |
+| vadam1 | 0/0 | 1/0 | 1/0 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
+| vadam2 | 0/0 | 1/0 | 2/1 | 0/0 | 27/2 | 0/0 | 0/2 |  | 1/1 |
+| vn1 | 0/0 | 1/1 | 26/12 | 1/0 | 0/0 | 4/4 | 0/4 |  | 8/6 |
+| vn2 | 0/0 | 1/2 | 27/12 | 2/0 | 0/0 | 1/1 | 0/0 |  | 10/7 |
 
 For gamba, the brief's 4.7.4 numbers were accidental 43/40, lyric 229/46, note 45/45, staff-details 8/31, break 1/2,
 words 3/4, barline 2/2. The baseline here matches them closely. The final gamba differences are listed under the
@@ -354,13 +355,42 @@ file and drift by 0.01 tenths per round trip (57.53 → 57.54 → 57.53), presum
 in `<scaling>`. It is now a reference test with layout export (`testSystemDividers_ref.xml`; `musicXmlIoTestRef` got
 the same optional `exportLayout` parameter as `musicXmlIoTest`).
 
-Result: see the page table. Nine parts now have exactly the printed page count. The others are va 25 (printed 22),
-vn1 30 (28), vn2 26 (23), ob2 19 (18). I compared the systems: exported with "all breaks", MuseScore has as many
-systems as the print where the page count matches, but 8 more in va, 11 in vn1, 9 in vn2 and 5 in ob2. MuseScore
-cannot fit some printed systems on one line and wraps them, and each wrapped system costs vertical space the printed
-page does not have. That is a horizontal spacing question (MuseScore's minimum note spacing against the engraver's,
-and the ignored `system-margins`), not a vertical one, so I stopped there. vn1 is one page worse than the baseline
-(29 → 30); I did not find out which page tips over.
+With the spacers alone, nine parts had the printed page count, but va had 25 pages (printed 22), vn1 30 (28), vn2 26
+(23) and ob2 19 (18). Exported with "all breaks", MuseScore had as many systems as the print in the other parts, but
+8 more in va, 11 in vn1, 9 in vn2 and 5 in ob2: its horizontal spacing is wider than the engraver's, so it could not
+fit some printed systems on one line and wrapped them, and each extra system cost vertical space the printed page
+does not have.
+
+Second commit (`c20c6b6f`), added after your request to preserve the page count: when layout and breaks are imported
+and the encoding declares `<supports element="print" attribute="new-system" type="yes"/>` (that is, that it gives
+every system break), the measures of each printed system are locked into one system with MuseScore's system locks
+(`Score::addSystemLock`, the "keep measures on the same system" feature). Layout then never breaks a locked system
+and squeezes it to fit (`HorizontalSpacing::squeezeSystemToFit`: first less padding and stretch, collisions only as
+a last resort). The declaration is the gate because without it a `new-system` may stand for several systems (for
+example in MuseScore's own export with "manual breaks"). All 12 parts declare it. MuseScore keeps the locks when it
+creates multimeasure rests (`EditSystemLocks::updateSystemLocksOnCreateMMRests`), and they are saved in `.mscx`.
+
+Result, with both commits: every part has the printed page count, and the system and page starts are identical to the
+print in all 12 parts (2153 systems; checked by exporting with "all breaks" and comparing every `new-system` and
+`new-page` with the input). The squeezed systems are dense but legible; I looked at the formerly wrapped systems on
+vn1 page 3 and va page 7. The layout also survives a MusicXML round trip: MuseScore's default export ("all breaks"
+with layout) declares the breaks complete and writes the distances, and converting that export back to PDF gives
+22 pages for va and 28 for vn1 again.
+
+Test for the locks: `systemLocks` (a file with two printed systems of twelve dense bars: with the declaration
+MuseScore keeps two systems, without it, it wraps them). 24 import references gain a `<SystemLocks>` block and nothing
+else (checked by diffing): `importTie2_ref.mscx`, `importTie3_ref.mscx`, `importTie4_ref.mscx`,
+`testArpCrossVoice_ref.mscx`, `testChordSymbols2_ref.mscx`, `testCodaHBox_ref.mscx`, `testDoletOttavas_ref.mscx`,
+`testFinaleDynamics_ref.mscx`, `testFinaleSystemObjects_ref.mscx`, `testImportDrums2_ref.mscx`,
+`testInferCodaII_ref.mscx`, `testInferSegnoII_ref.mscx`, `testInferredCrescLines_ref.mscx`,
+`testInferredCrescLines2_ref.mscx`, `testInferredDynamicsExpression_ref.mscx`, `testInferredTempoText_ref.mscx`,
+`testMS3KitAndPerc_ref.mscx`, `testMeasureStyleSlash_ref.mscx`, `testNamedNoteheads_ref.mscx`,
+`testPlacementOffsetDefaults_ref.mscx`, `testSibMetronomeMarks_ref.mscx`, `testSibOttavas_ref.mscx`,
+`testSibRitLine_ref.mscx`, `testSticking_ref.mscx`.
+
+Not done: page locks. MuseScore also has page locks, which would keep the printed pages even if their systems did not
+fit vertically. With the spacers and system locks no page overflows in the 12 parts, so I left them out; they would be
+the next step if another file still overflows.
 
 Risks: fixed distances skip collision checks, so lyrics or dynamics that MuseScore draws larger than the print can
 collide (I looked at gamba page 3 and saw none). The change applies to every MusicXML file with `<print>` distances
@@ -405,6 +435,7 @@ Changed reference files, with the commit that changed them:
   `testSystemObjectStaves_ref.mscx`, `testTempoTextSpace1_ref.mscx`, `testTempoTextSpace2_ref.mscx`,
   `testVoltaHiding_ref.mscx`; new `testSystemDividers_ref.xml` (test changed from round trip to reference).
 - `0e8d165a`: `testCourtesyAccidentals*` (test file extended).
+- `c20c6b6f` (system locks only): the 24 files listed under defect 9.
 
 No input file of an existing test was changed.
 
@@ -460,8 +491,7 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
   heuristic of defect 4 applies to the moved clef).
 - MuseScore fills gaps in voices with rests (liuto note 0/99): the checker counts them as gained notes.
 - Jump texts (Da capo, al Fine, tacet) are exported on staff 1 of the part (gamba words 3/3).
-- Barline differences in several parts (for example bc 21/1) and system breaks moved by one measure near multimeasure
-  rests (break columns) were not investigated.
+- Barline differences in several parts (for example bc 21/1) were not investigated.
 - The exported `<millimeters>` is rounded, so positions drift by 0.01 tenths on a round trip (see defect 9).
 - Figured bass: MuseScore reads and writes `cross` and `backslash`, while MusicXML uses `plus`, `back-slash` and
   `vertical`, so these standard values are lost on import.
@@ -473,7 +503,9 @@ Repros 10 to 13 (`repro/`, generated by `tools/make_repros.py`, XSD-valid).
 1. Defect 5: is "staff-size below 100 without staff-type scales the notation" what you want for the gamba's staff 3?
 2. Defect 4: is a heuristic for cue clefs acceptable, or should the clef get a saved property?
 3. Defect 8: how to handle the Reserved Font Name of MScoreBC upstream.
-4. Defect 9: should the spacers move behind their own import preference before proposing it upstream?
+4. Defect 9: should the spacers and the system locks move behind their own import preference before proposing them
+   upstream? Both change every import of a file with printed layout (the locks only where all system breaks are
+   declared).
 5. The encoding of the 8 grace cue notes (`size="cue"` versus `grace-cue`) and the `staff-layout` numbering in bc and
    ob2.
 
