@@ -8144,6 +8144,8 @@ static void writeStaffDetails(XmlWriter& xml, const Part* part, const std::vecto
     for (size_t i = 0; i < staves; i++) {
         Staff* st = part->staff(i);
         const double mag = st->staffMag(Fraction(0, 1));
+        const double lineDistance = st->lineDistance(Fraction(0, 1));
+        const bool isSmall = st->staffType(Fraction(0, 1))->isSmall();
         bool hidden = false;
         if (!st->show()) {
             hidden = true;
@@ -8158,7 +8160,7 @@ static void writeStaffDetails(XmlWriter& xml, const Part* part, const std::vecto
         const bool invis = st->isLinesInvisible(Fraction(0, 1));
         const bool needsLineDetails = invis || lineColor != engravingConfiguration()->defaultColor();
         if (st->lines(Fraction(0, 1)) != 5 || st->isTabStaff(Fraction(0, 1)) || !muse::RealIsEqual(mag, 1.0)
-            || hidden || needsLineDetails) {
+            || !muse::RealIsEqual(lineDistance, 1.0) || isSmall || hidden || needsLineDetails) {
             XmlWriter::Attributes attributes;
             if (staves > 1) {
                 attributes.emplace_back(std::make_pair("number", i + 1));
@@ -8177,6 +8179,8 @@ static void writeStaffDetails(XmlWriter& xml, const Part* part, const std::vecto
 
             if (i > 0 && st->links() && st->links()->contains(part->staff(i - 1))) {
                 xml.tag("staff-type", "alternate");
+            } else if (isSmall) {
+                xml.tag("staff-type", "cue");
             }
 
             xml.tag("staff-lines", st->lines(Fraction(0, 1)));
@@ -8211,7 +8215,6 @@ static void writeStaffDetails(XmlWriter& xml, const Part* part, const std::vecto
                 }
             }
 
-            double lineDistance = st->lineDistance(Fraction(0, 1));
             bool needWriteLineDistance = !muse::RealIsEqual(lineDistance, 1.0);
             bool needWriteMag = !muse::RealIsEqual(mag, 1.0);
             if (needWriteLineDistance || needWriteMag) {

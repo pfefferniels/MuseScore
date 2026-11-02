@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="4.0">
+  <work>
+    <work-title>Reduced staves</work-title>
+    </work>
+  <part-list>
+    <score-part id="P1">
+      <part-name>Viola da gamba</part-name>
+      </score-part>
+    </part-list>
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>1</divisions>
+        <key>
+          <fifths>0</fifths>
+          </key>
+        <time>
+          <beats>4</beats>
+          <beat-type>4</beat-type>
+          </time>
+        <staves>3</staves>
+        <clef number="1">
+          <sign>G</sign>
+          <line>2</line>
+          <clef-octave-change>-1</clef-octave-change>
+          </clef>
+        <clef number="2">
+          <sign>C</sign>
+          <line>3</line>
+          </clef>
+        <clef number="3">
+          <sign>F</sign>
+          <line>4</line>
+          </clef>
+        <staff-details number="1">
+          <staff-type>cue</staff-type>
+          <staff-size>75</staff-size>
+          </staff-details>
+        <staff-details number="2">
+          <staff-size>75</staff-size>
+          </staff-details>
+        <staff-details number="3">
+          <staff-type>ossia</staff-type>
+          </staff-details>
+        </attributes>
+      <note>
+        <pitch>
+          <step>A</step>
+          <octave>3</octave>
+          </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>whole</type>
+        <staff>1</staff>
+        </note>
+      <backup>
+        <duration>4</duration>
+        </backup>
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>4</duration>
+        <voice>5</voice>
+        <type>whole</type>
+        <staff>2</staff>
+        </note>
+      <backup>
+        <duration>4</duration>
+        </backup>
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+          </pitch>
+        <duration>4</duration>
+        <voice>9</voice>
+        <type>whole</type>
+        <staff>3</staff>
+        </note>
+      <barline location="right">
+        <bar-style>light-heavy</bar-style>
+        </barline>
+      </measure>
+    </part>
+  </score-partwise>

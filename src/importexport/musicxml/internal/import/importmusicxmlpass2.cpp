@@ -3209,8 +3209,14 @@ void MusicXmlParserPass2::staffDetails(const String& partId, Measure* measure)
     }
 
     int staffLines = 0;
+    bool reducedStaff = false;
+    double staffSize = 0.0;
+    double scaling = 0.0;
     while (m_e.readNextStartElement()) {
-        if (m_e.name() == "staff-lines") {
+        if (m_e.name() == "staff-type") {
+            const String type = m_e.readText();
+            reducedStaff = type == u"cue" || type == u"ossia" || type == u"editorial";
+        } else if (m_e.name() == "staff-lines") {
             // save staff lines for later
             staffLines = m_e.readInt();
             // for a TAB staff also resize the string table and init with zeroes
@@ -3231,10 +3237,8 @@ void MusicXmlParserPass2::staffDetails(const String& partId, Measure* measure)
         } else if (m_e.name() == "staff-tuning") {
             staffTuning(&stringData);
         } else if (m_e.name() == "staff-size") {
-            const double scaling = m_e.doubleAttribute("scaling", 100.0);
-            const Spatium val(m_e.readDouble() / scaling);
-            m_score->staff(staffIdx)->setProperty(Pid::MAG, scaling / 100.0);
-            m_score->staff(staffIdx)->setProperty(Pid::LINE_DISTANCE, val);
+            scaling = m_e.doubleAttribute("scaling", 0.0);
+            staffSize = m_e.readDouble();
         } else {
             skipLogCurrElem();
         }
@@ -3242,6 +3246,22 @@ void MusicXmlParserPass2::staffDetails(const String& partId, Measure* measure)
 
     if (staffLines > 0) {
         setStaffLines(m_score, staffIdx, staffLines);
+    }
+
+    Staff* staff = m_score->staff(staffIdx);
+    if (reducedStaff) {
+        staff->setProperty(Pid::SMALL, true);
+    }
+    if (staffSize > 0.0) {
+        // Without scaling, a reduced staff scales its notation too, while
+        // a larger one (such as tablature) only spaces its lines further apart
+        if (scaling <= 0.0) {
+            scaling = (reducedStaff || staffSize < 100.0) ? staffSize : 100.0;
+        }
+        const bool isSmall = staff->staffType(Fraction(0, 1))->isSmall();
+        const double smallMag = isSmall ? m_score->style().styleD(Sid::smallStaffMag) : 1.0;
+        staff->setProperty(Pid::MAG, scaling / 100.0 / smallMag);
+        staff->setProperty(Pid::LINE_DISTANCE, Spatium(staffSize / scaling));
     }
 
     Instrument* i = part->instrument();

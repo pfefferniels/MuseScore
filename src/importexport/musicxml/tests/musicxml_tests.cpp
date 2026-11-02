@@ -26,6 +26,8 @@
 #include "engraving/dom/jump.h"
 #include "engraving/dom/marker.h"
 #include "engraving/dom/masterscore.h"
+#include "engraving/dom/staff.h"
+#include "engraving/dom/stafftype.h"
 
 #include "settings.h"
 #include "importexport/musicxml/imusicxmlconfiguration.h"
@@ -1239,6 +1241,38 @@ TEST_F(MusicXml_Tests, staffEmptiness) {
 }
 TEST_F(MusicXml_Tests, staffSize) {
     musicXmlIoTest("testStaffSize");
+}
+TEST_F(MusicXml_Tests, staffSizeCue1)
+{
+    MasterScore* score = readScore(XML_IO_DATA_DIR + u"testStaffSizeCue.xml");
+    ASSERT_TRUE(score);
+    ASSERT_EQ(score->nstaves(), 3u);
+
+    // staff-type cue with staff-size 75: small staff scaled to 75 %
+    const Staff* cue = score->staff(0);
+    EXPECT_TRUE(cue->staffType(Fraction(0, 1))->isSmall());
+    EXPECT_NEAR(cue->staffMag(Fraction(0, 1)), 0.75, 1e-9);
+    EXPECT_NEAR(cue->lineDistance(Fraction(0, 1)), 1.0, 1e-9);
+
+    // staff-size 75 without staff-type and scaling: notation scaled as well
+    const Staff* reduced = score->staff(1);
+    EXPECT_FALSE(reduced->staffType(Fraction(0, 1))->isSmall());
+    EXPECT_NEAR(reduced->staffMag(Fraction(0, 1)), 0.75, 1e-9);
+    EXPECT_NEAR(reduced->lineDistance(Fraction(0, 1)), 1.0, 1e-9);
+
+    // staff-type ossia without staff-size: small staff
+    const Staff* ossia = score->staff(2);
+    EXPECT_TRUE(ossia->staffType(Fraction(0, 1))->isSmall());
+    EXPECT_NEAR(ossia->staffMag(Fraction(0, 1)), score->style().styleD(Sid::smallStaffMag), 1e-9);
+    EXPECT_NEAR(ossia->lineDistance(Fraction(0, 1)), 1.0, 1e-9);
+
+    delete score;
+}
+TEST_F(MusicXml_Tests, staffSizeCue2) {
+    musicXmlIoTestRef("testStaffSizeCue");
+}
+TEST_F(MusicXml_Tests, staffSizeCue3) {
+    musicXmlIoTest("testStaffSizeCue_ref");
 }
 TEST_F(MusicXml_Tests, staffTwoKeySigs) {
     musicXmlIoTest("testStaffTwoKeySigs");
