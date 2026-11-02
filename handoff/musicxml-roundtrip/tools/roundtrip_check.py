@@ -109,6 +109,9 @@ def attribute_facts(attributes: ET.Element, staves: int) -> Iterator[tuple[str, 
         yield clef.get("number", "1"), "clef", value.strip()
     for key in attributes.findall("key"):
         yield key.get("number", "all"), "key", text_of(key, "fifths")
+    for time in attributes.findall("time"):
+        value = "+".join(f"{b.text}/{t.text}" for b, t in zip(time.findall("beats"), time.findall("beat-type")))
+        yield time.get("number", "all"), "time", "senza-misura" if time.find("senza-misura") is not None else value
     for details in attributes.findall("staff-details"):
         value = f"{text_of(details, 'staff-type')} size={text_of(details, 'staff-size')} {attrs(details, 'print-object')}"
         yield details.get("number", "1"), "staff-details", value
