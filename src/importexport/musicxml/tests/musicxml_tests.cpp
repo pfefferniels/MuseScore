@@ -372,7 +372,7 @@ TEST_F(MusicXml_Tests, accidentals2) {
     musicXmlIoTest("testAccidentals2");
 }
 TEST_F(MusicXml_Tests, accidentals3) {
-    musicXmlIoTest("testAccidentals3");
+    musicXmlIoTestRef("testAccidentals3");
 }
 TEST_F(MusicXml_Tests, arpCrossVoice) {
     musicXmlImportTestRef("testArpCrossVoice");
@@ -511,6 +511,12 @@ TEST_F(MusicXml_Tests, copyrightScale) {
 }
 TEST_F(MusicXml_Tests, courtesyAccidentals) {
     musicXmlImportTestRef("testCourtesyAccidentals");
+}
+TEST_F(MusicXml_Tests, courtesyAccidentalsExport) {
+    musicXmlIoTestRef("testCourtesyAccidentals");
+}
+TEST_F(MusicXml_Tests, courtesyAccidentalsRoundTrip) {
+    musicXmlIoTest("testCourtesyAccidentals_ref");
 }
 TEST_F(MusicXml_Tests, cueGraceNotes1) {
     musicXmlImportTestRef("testCueGraceNotes");
