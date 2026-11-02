@@ -7,7 +7,7 @@ parts of Bach's St John Passion. The task is in `PROMPT.md`.
   `tools/make_repros.py` generates 01 to 08 and 04b, 05b. `05c` is `05b` with `new-page` and the `<defaults>` of
   the flute I part. `09` is five bars of the flute I part cut with `tools/excerpt.py` (lyrics, credits and
   identification removed, `<defaults>` reduced to scaling and page layout). `make_repros.py` also generates 10 to
-  13 (the untested items). `14` is hand-written (words on a hidden staff at the start of a multirest).
+  13, 12b and 13b (the untested items). `14` is hand-written (words on a hidden staff at the start of a multirest).
 - `REPORT.md`: results of the session that worked on `PROMPT.md`.
 - `baseline-4.7.4/`: output of `tools/run_roundtrip.py` with the MuseScore 4.7.4 release build (macOS):
   re-exported MusicXML, PNG renderings and checker reports.

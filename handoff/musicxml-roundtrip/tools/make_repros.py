@@ -237,6 +237,25 @@ REPROS["13-per-staff-transpose"] = score("per-staff transpose", [
             note("C", 5, dur=16, typ="whole", staff=2, voice=5)),
 ])
 
+# 13b. As in the oboe parts: staff 1 in F, staff 2 in A, staff 3 without transpose (so at concert pitch); one key for
+# all staves, then a key per staff. All staves sound D5 in measure 1, staves 2 and 3 sound G4 in measure 2.
+REPROS["13b-per-staff-transpose-three-staves"] = score("per-staff transpose, three staves", [
+    measure(1, attributes(clef("G", 2, 1) + clef("G", 2, 2) + clef("G", 2, 3), staves=3, fifths=2,
+                          extra='<transpose number="1"><diatonic>-4</diatonic><chromatic>-7</chromatic></transpose>'
+                                '<transpose number="2"><diatonic>-2</diatonic><chromatic>-3</chromatic></transpose>'),
+            note("A", 5, dur=16, typ="whole", staff=1),
+            backup(),
+            note("F", 5, dur=16, typ="whole", alter=0, acc="natural", staff=2, voice=5),
+            backup(),
+            note("D", 5, dur=16, typ="whole", staff=3, voice=9)),
+    measure(2, '<attributes><key number="2"><fifths>-2</fifths></key><key number="3"><fifths>1</fifths></key></attributes>',
+            rest(staff=1),
+            backup(),
+            note("B", 4, dur=16, typ="whole", alter=-1, staff=2, voice=5),
+            backup(),
+            note("G", 4, dur=16, typ="whole", staff=3, voice=9)),
+])
+
 
 def main(outdir):
     out = Path(outdir)
