@@ -61,7 +61,7 @@
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>Two</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         <lyric number="2">
           <syllabic>single</syllabic>
@@ -77,10 +77,13 @@
         <voice>1</voice>
         <type>half</type>
         <stem>up</stem>
+        <lyric number="1">
+          <extend type="stop"/>
+          </lyric>
         <lyric number="2">
           <syllabic>single</syllabic>
           <text>Two</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         </note>
       </measure>
@@ -94,10 +97,13 @@
         <voice>1</voice>
         <type>half</type>
         <stem>up</stem>
+        <lyric number="2">
+          <extend type="stop"/>
+          </lyric>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>Two</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         </note>
       <note>
@@ -109,6 +115,9 @@
         <voice>1</voice>
         <type>quarter</type>
         <stem>up</stem>
+        <lyric number="1">
+          <extend type="stop"/>
+          </lyric>
         <lyric number="2">
           <syllabic>single</syllabic>
           <text>One</text>
@@ -134,7 +143,7 @@
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>Three</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         </note>
       <note>
@@ -147,6 +156,9 @@
         <type>eighth</type>
         <stem>up</stem>
         <beam number="1">begin</beam>
+        <lyric number="1">
+          <extend type="continue"/>
+          </lyric>
         </note>
       <note>
         <pitch>
@@ -158,6 +170,9 @@
         <type>eighth</type>
         <stem>up</stem>
         <beam number="1">end</beam>
+        <lyric number="1">
+          <extend type="stop"/>
+          </lyric>
         </note>
       <note>
         <rest/>
@@ -179,7 +194,7 @@
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>Two</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         </note>
       <note>
@@ -191,6 +206,9 @@
         <voice>1</voice>
         <type>half</type>
         <stem>up</stem>
+        <lyric number="1">
+          <extend type="stop"/>
+          </lyric>
         </note>
       <note>
         <rest/>
@@ -212,7 +230,7 @@
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>Four</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         </note>
       <note>
@@ -224,6 +242,9 @@
         <voice>1</voice>
         <type>quarter</type>
         <stem>up</stem>
+        <lyric number="1">
+          <extend type="continue"/>
+          </lyric>
         </note>
       <note>
         <pitch>
@@ -234,6 +255,9 @@
         <voice>1</voice>
         <type>quarter</type>
         <stem>up</stem>
+        <lyric number="1">
+          <extend type="continue"/>
+          </lyric>
         </note>
       <note>
         <pitch>
@@ -244,6 +268,9 @@
         <voice>1</voice>
         <type>quarter</type>
         <stem>up</stem>
+        <lyric number="1">
+          <extend type="stop"/>
+          </lyric>
         </note>
       </measure>
     <measure number="6">
@@ -259,7 +286,7 @@
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>Two</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         <lyric number="2">
           <syllabic>single</syllabic>
@@ -275,10 +302,13 @@
         <voice>1</voice>
         <type>half</type>
         <stem>up</stem>
+        <lyric number="1">
+          <extend type="stop"/>
+          </lyric>
         <lyric number="2">
           <syllabic>single</syllabic>
           <text>Two</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         </note>
       </measure>
@@ -292,10 +322,13 @@
         <voice>1</voice>
         <type>half</type>
         <stem>up</stem>
+        <lyric number="2">
+          <extend type="stop"/>
+          </lyric>
         <lyric number="1">
           <syllabic>single</syllabic>
           <text>Two</text>
-          <extend/>
+          <extend type="start"/>
           </lyric>
         </note>
       <note>
@@ -307,6 +340,9 @@
         <voice>1</voice>
         <type>quarter</type>
         <stem>up</stem>
+        <lyric number="1">
+          <extend type="stop"/>
+          </lyric>
         <lyric number="2">
           <syllabic>single</syllabic>
           <text>One</text>

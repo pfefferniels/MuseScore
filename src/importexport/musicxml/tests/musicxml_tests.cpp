@@ -971,16 +971,22 @@ TEST_F(MusicXml_Tests, lyrics1) {
     musicXmlIoTestRef("testLyrics1");
 }
 TEST_F(MusicXml_Tests, lyricExtension1) {
-    musicXmlIoTest("testLyricExtensions");
+    musicXmlIoTestRef("testLyricExtensions");
 }
 TEST_F(MusicXml_Tests, lyricExtension2) {
     musicXmlImportTestRef("testLyricExtensions");
 }
 TEST_F(MusicXml_Tests, lyricExtension3) {
-    musicXmlIoTest("testLyricExtension2");
+    musicXmlIoTestRef("testLyricExtension2");
 }
 TEST_F(MusicXml_Tests, lyricExtension4) {
     musicXmlImportTestRef("testLyricExtension2");
+}
+TEST_F(MusicXml_Tests, lyricExtensionStartContinueStop) {
+    musicXmlIoTestRef("testLyricExtensionStartContinueStop");
+}
+TEST_F(MusicXml_Tests, lyricExtensionStartContinueStopRoundTrip) {
+    musicXmlIoTest("testLyricExtensionStartContinueStop_ref");
 }
 TEST_F(MusicXml_Tests, lyricsNorwegianOSlash) {
     musicXmlImportTestRef("testLyricsNorwegianOSlash");

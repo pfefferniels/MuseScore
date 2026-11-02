@@ -389,6 +389,7 @@ private:
     void barlineMiddle(const BarLine* bl);
     void barlineRight(const Measure* const m, const track_idx_t strack, const track_idx_t etrack);
     void lyrics(const std::vector<Lyrics*>& ll, const track_idx_t trk);
+    void melismaExtends(const Chord* chord);
     void work(const MeasureBase* measure);
     void calcDivMoveToTick(const Fraction& t, const Fraction& stretch = { 1, 1 });
     void calcDivisions();
@@ -441,6 +442,7 @@ private:
     MusicXmlInstrumentMap m_instrMap;
     PlayingTechniqueType m_currPlayTechnique = PlayingTechniqueType::Undefined;
     bool m_isMxl = false;
+    std::map<std::pair<track_idx_t, int>, Fraction> m_melismaEnds; // per track and verse
 };
 
 //---------------------------------------------------------
@@ -4545,6 +4547,7 @@ void ExportMusicXml::chord(Chord* chord, staff_idx_t staff, const std::vector<Ly
         notations.etag(m_xml);
         // write lyrics (only for first note)
         if (!grace && (note == nl.front())) {
+            melismaExtends(chord);
             lyrics(ll, chord->track());
         }
         m_xml.endElement();
@@ -6125,10 +6128,48 @@ void ExportMusicXml::lyrics(const std::vector<Lyrics*>& ll, const track_idx_t tr
                 MScoreTextToMusicXml mttm(u"text", attr, defFmt, mtf);
                 mttm.writeTextFragments(l->fragmentList(), m_xml);
                 if (l->ticks().isNotZero()) {
-                    m_xml.tag("extend");
+                    m_xml.tag("extend", { { "type", "start" } });
+                    m_melismaEnds[{ trk, l->verse() }] = l->endTick();
                 }
                 m_xml.endElement();
             }
+        }
+    }
+}
+
+//---------------------------------------------------------
+//   melismaExtends
+//---------------------------------------------------------
+
+/**
+ Write the extend continue and stop of the melismas started on an earlier chord in this track.
+ */
+
+void ExportMusicXml::melismaExtends(const Chord* chord)
+{
+    const track_idx_t track = chord->track();
+    const Fraction tick = chord->tick();
+    for (auto it = m_melismaEnds.begin(); it != m_melismaEnds.end();) {
+        const auto& [trackVerse, endTick] = *it;
+        if (trackVerse.first != track) {
+            ++it;
+            continue;
+        }
+        const int verse = trackVerse.second;
+        const bool hasLyric = std::any_of(chord->lyrics().begin(), chord->lyrics().end(), [verse](const Lyrics* l) {
+            return l->verse() == verse;
+        });
+        if (tick > endTick || hasLyric) {
+            it = m_melismaEnds.erase(it);
+            continue;
+        }
+        m_xml.startElementRaw(String(u"lyric number=\"%1\"").arg(verse + 1));
+        m_xml.tag("extend", { { "type", tick < endTick ? "continue" : "stop" } });
+        m_xml.endElement();
+        if (tick == endTick) {
+            it = m_melismaEnds.erase(it);
+        } else {
+            ++it;
         }
     }
 }
