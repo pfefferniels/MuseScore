@@ -2595,9 +2595,12 @@ static void markUserAccidentals(const staff_idx_t firstStaff,
                 const AccidentalVal noteAccVal = tpc2alter(nt->tpc());
                 if (muse::contains(alterMap, nt)) {
                     const AccidentalType accType = nt->accidental()->accidentalType();
+                    // layout drops the accidental of a note tied from the same pitch
+                    const Tie* tieBack = nt->tieBackNonPartial();
+                    const bool tiedOver = tieBack && tieBack->startNote() && tieBack->startNote()->tpc() == nt->tpc();
                     if (Accidental::isMicrotonal(accType) && accType < AccidentalType::END) {
                         nt->accidental()->setRole(AccidentalRole::USER);
-                    } else if (prevAccVal == noteAccVal && Accidental::subtype2value(accType) == noteAccVal) {
+                    } else if ((prevAccVal == noteAccVal || tiedOver) && Accidental::subtype2value(accType) == noteAccVal) {
                         nt->accidental()->setRole(AccidentalRole::USER);
                     }
                 }
