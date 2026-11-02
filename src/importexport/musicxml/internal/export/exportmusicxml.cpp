@@ -6195,7 +6195,7 @@ void ExportMusicXml::melismaExtends(const Chord* chord)
 
 // LVIFIX: TODO coda and segno should be numbered uniquely
 
-static void directionJump(XmlWriter& xml, const Jump* const jp)
+static void directionJump(XmlWriter& xml, const Jump* const jp, const staff_idx_t staff)
 {
     JumpType jtp = jp->jumpType();
     String words;
@@ -6238,7 +6238,11 @@ static void directionJump(XmlWriter& xml, const Jump* const jp)
         }
         isDalSegno = true;
     } else if (jtp == JumpType::DS) {
-        words = u"D.S.";
+        if (jp->xmlText().empty()) {
+            words = u"D.S.";
+        } else {
+            words = jp->xmlText();
+        }
         isDalSegno = true;
     } else {
         words = jp->xmlText();
@@ -6264,8 +6268,16 @@ static void directionJump(XmlWriter& xml, const Jump* const jp)
         xml.startElement("direction-type");
         String attrs = color2xml(jp);
         attrs += ExportMusicXml::positioningAttributes(jp);
-        writeWordsAndSymbolsXml(xml, words, attrs);
+        if (words == u"<sym>segno</sym>" || words == u"<sym>coda</sym>") {
+            // a jump drawn as the sign alone
+            xml.tagRaw(words.mid(5, words.size() - 11) + attrs);
+        } else {
+            writeWordsAndSymbolsXml(xml, words, attrs);
+        }
         xml.endElement();
+        if (staff) {
+            xml.tag("staff", static_cast<int>(staff));
+        }
         if (!sound.empty()) {
             xml.tagRaw(u"sound " + sound);
         }
@@ -6335,7 +6347,7 @@ static String findCodaLabel(const std::vector<const Jump*>& jumps, const String&
 //   directionMarker -- write marker
 //---------------------------------------------------------
 
-static void directionMarker(XmlWriter& xml, const Marker* const m, const std::vector<const Jump*>& jumps)
+static void directionMarker(XmlWriter& xml, const Marker* const m, const std::vector<const Jump*>& jumps, const staff_idx_t staff)
 {
     const MarkerType mtp = getEffectiveMarkerType(m, jumps);
     String words;
@@ -6408,6 +6420,9 @@ static void directionMarker(XmlWriter& xml, const Marker* const m, const std::ve
             writeWordsAndSymbolsXml(xml, words, attrs);
         }
         xml.endElement();
+        if (staff) {
+            xml.tag("staff", static_cast<int>(staff));
+        }
         if (!sound.empty()) {
             xml.tagRaw(String(u"sound ") + sound);
         }
@@ -6453,13 +6468,13 @@ void ExportMusicXml::repeatAtMeasureStart(Attributes& attr, const Measure* const
 {
     // loop over all segments
     for (EngravingItem* e : m->el()) {
-        track_idx_t wtrack = muse::nidx;     // track to write jump
-        if (strack <= e->track() && e->track() < etrack) {
-            wtrack = findTrackForAnnotations(e->track(), m->first(SegmentType::ChordRest));
-        }
-        if (track != wtrack) {
+        // a jump or marker may be on any staff of the part, but a copy of it shown on another staff is written once
+        if (e->track() < strack || e->track() >= etrack || track != strack
+            || (e->systemFlag() && !e->isTopSystemObject() && e->isLinked())) {
             continue;
         }
+        const staff_idx_t staves = track2staff(etrack) - track2staff(strack);
+        const staff_idx_t staff = staves > 1 ? track2staff(e->track()) - track2staff(strack) + 1 : 0;
         switch (e->type()) {
         case ElementType::MARKER:
         {
@@ -6475,7 +6490,7 @@ void ExportMusicXml::repeatAtMeasureStart(Attributes& attr, const Measure* const
             case MarkerType::CODETTA:
                 LOGD(" -> handled");
                 attr.doAttr(m_xml, false);
-                directionMarker(m_xml, mk, m_jumpElements);
+                directionMarker(m_xml, mk, m_jumpElements, staff);
                 break;
             case MarkerType::FINE:
             case MarkerType::TOCODA:
@@ -6505,13 +6520,13 @@ void ExportMusicXml::repeatAtMeasureStart(Attributes& attr, const Measure* const
 void ExportMusicXml::repeatAtMeasureStop(const Measure* const m, track_idx_t strack, track_idx_t etrack, track_idx_t track)
 {
     for (EngravingItem* e : m->el()) {
-        track_idx_t wtrack = muse::nidx;     // track to write jump
-        if (strack <= e->track() && e->track() < etrack) {
-            wtrack = findTrackForAnnotations(e->track(), m->first(SegmentType::ChordRest));
-        }
-        if (track != wtrack) {
+        // a jump or marker may be on any staff of the part, but a copy of it shown on another staff is written once
+        if (e->track() < strack || e->track() >= etrack || track != strack
+            || (e->systemFlag() && !e->isTopSystemObject() && e->isLinked())) {
             continue;
         }
+        const staff_idx_t staves = track2staff(etrack) - track2staff(strack);
+        const staff_idx_t staff = staves > 1 ? track2staff(e->track()) - track2staff(strack) + 1 : 0;
         switch (e->type()) {
         case ElementType::MARKER:
         {
@@ -6525,7 +6540,7 @@ void ExportMusicXml::repeatAtMeasureStop(const Measure* const m, track_idx_t str
             case MarkerType::TOCODASYM:
             case MarkerType::DA_CODA:
             case MarkerType::DA_DBLCODA:
-                directionMarker(m_xml, mk, m_jumpElements);
+                directionMarker(m_xml, mk, m_jumpElements, staff);
                 break;
             case MarkerType::SEGNO:
             case MarkerType::VARSEGNO:
@@ -6541,7 +6556,7 @@ void ExportMusicXml::repeatAtMeasureStop(const Measure* const m, track_idx_t str
         }
         break;
         case ElementType::JUMP:
-            directionJump(m_xml, toJump(e));
+            directionJump(m_xml, toJump(e), staff);
             break;
         default:
             LOGD("repeatAtMeasureStop: direction type %s at tick %d not implemented",

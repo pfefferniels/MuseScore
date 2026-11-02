@@ -1017,6 +1017,12 @@ TEST_F(MusicXml_Tests, invisibleNote) {
 TEST_F(MusicXml_Tests, invisibleTempo) {
     musicXmlIoTest("testInvisibleTempo");
 }
+TEST_F(MusicXml_Tests, jumpsOtherStaff1) {
+    musicXmlImportTestRef("testJumpsOtherStaff");
+}
+TEST_F(MusicXml_Tests, jumpsOtherStaff2) {
+    musicXmlIoTestRef("testJumpsOtherStaff");
+}
 TEST_F(MusicXml_Tests, keysig1) {
     musicXmlIoTest("testKeysig1");
 }
