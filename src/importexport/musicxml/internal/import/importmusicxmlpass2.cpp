@@ -254,6 +254,34 @@ void MusicXmlLyricsExtend::setExtend(const int verse, const track_idx_t track, c
 }
 
 //---------------------------------------------------------
+//   stopExtend
+//---------------------------------------------------------
+
+// end the extend of lyric verse in the staff of cr on cr, where the file has <extend type="stop"/>
+// an extend in the voice of cr takes precedence over one in another voice
+
+void MusicXmlLyricsExtend::stopExtend(const int verse, const ChordRest* cr)
+{
+    std::vector<Lyrics*> list;
+    for (const bool sameTrack : { true, false }) {
+        for (Lyrics* l : m_lyrics) {
+            const ChordRest* par = l->chordRest();
+            if (par && l->verse() == verse && par->tick() < cr->tick()
+                && (sameTrack ? par->track() == cr->track() : track2staff(par->track()) == track2staff(cr->track()))) {
+                list.push_back(l);
+            }
+        }
+        if (!list.empty()) {
+            break;
+        }
+    }
+    for (Lyrics* l : list) {
+        l->setTicks(cr->tick() - l->chordRest()->tick());
+        muse::remove(m_lyrics, l);
+    }
+}
+
+//---------------------------------------------------------
 //   MusicXmlStepAltOct2Pitch
 //---------------------------------------------------------
 
@@ -7913,6 +7941,11 @@ Note* MusicXmlParserPass2::note(const String& partId,
     if (cr && !grace) {
         // add lyrics and stop corresponding extends
         addLyrics(m_logger, &m_e, cr, lyric.numberedLyrics(), lyric.extendedLyrics(), m_extendedLyrics);
+        if (c) {
+            for (const int verse : lyric.stoppedExtends()) {
+                m_extendedLyrics.stopExtend(verse, c);
+            }
+        }
         if (rest) {
             // stop all extends
             m_extendedLyrics.setExtend(-1, cr->track(), cr->tick());
@@ -8670,8 +8703,14 @@ void MusicXmlParserLyric::parse(bool visibility)
         }
     }
 
-    // if no lyric read (e.g. only 'extend "type=stop"'), no further action required
+    // if no lyric read (e.g. only 'extend "type=stop"'), only an extend may end here
     if (formattedText.empty()) {
+        if (hasExtend && extendType == u"stop") {
+            const int lyricNo = m_lyricNumberHandler.getLyricNo(lyricNumber);
+            if (lyricNo >= 0 && lyricNo <= MAX_LYRICS) {
+                m_stoppedExtends.insert(lyricNo);
+            }
+        }
         return;
     }
 

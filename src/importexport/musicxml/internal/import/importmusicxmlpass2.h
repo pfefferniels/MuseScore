@@ -195,6 +195,7 @@ public:
     void addLyric(engraving::Lyrics* const lyric);
     void setExtend(const int verse, const engraving::track_idx_t track, const engraving::Fraction& tick,
                    const engraving::Lyrics* prevAddedLyrics);
+    void stopExtend(const int verse, const engraving::ChordRest* cr);
 
 private:
     std::set<engraving::Lyrics*> m_lyrics;
@@ -237,6 +238,7 @@ public:
     std::set<engraving::Lyrics*> extendedLyrics() const { return m_extendedLyrics; }
     std::map<int, engraving::Lyrics*> numberedLyrics() const { return m_numberedLyrics; }
     std::vector<engraving::Sticking*> inferredStickings() const { return m_inferredStickings; }
+    const std::set<int>& stoppedExtends() const { return m_stoppedExtends; }
     void parse(bool visibility = true);
 private:
     void skipLogCurrElem();
@@ -247,6 +249,7 @@ private:
     MusicXmlLogger* m_logger = nullptr;            // Error logger
     std::map<int, engraving::Lyrics*> m_numberedLyrics;   // lyrics with valid number
     std::set<engraving::Lyrics*> m_extendedLyrics;        // lyrics with the extend flag set
+    std::set<int> m_stoppedExtends;                       // lyric numbers with only an extend stop
     std::vector<engraving::Sticking*> m_inferredStickings;   // stickings with valid number
     double m_defaultY = 0.0;
     double m_relativeY = 0.0;
