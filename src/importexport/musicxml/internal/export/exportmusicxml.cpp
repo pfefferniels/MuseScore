@@ -7712,7 +7712,13 @@ void ExportMusicXml::findAndExportClef(const Measure* const m, const int staves,
     Segment* seg         = 0;
 
     if (prevMeasure) {
-        cs1 = prevMeasure->findSegment(SegmentType::Clef, tick);
+        // layout moves a clef at the end of a multimeasure rest into the replacing measure
+        Measure* prevMMRest = prevMeasure->coveringMMRestOrThis();
+        if (prevMMRest->isMMRest() && prevMMRest->mmRestLast() == prevMeasure) {
+            cs1 = prevMMRest->findSegment(SegmentType::Clef, tick);
+        } else {
+            cs1 = prevMeasure->findSegment(SegmentType::Clef, tick);
+        }
     } else {
         cs1 = m->findSegment(SegmentType::HeaderClef, tick);
     }
