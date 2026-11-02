@@ -79,7 +79,25 @@ def note_facts(note: ET.Element, divisions: int) -> Iterator[tuple[str, str]]:
         yield "lyric", f"{lyric.get('number', '1')} {text_of(lyric, 'syllabic')} {''.join(t.text or '' for t in lyric.findall('text'))}{ext}"
 
 
-def attribute_facts(attributes: ET.Element) -> Iterator[tuple[str, str, str]]:
+def transpose_value(transpose: ET.Element | None) -> str:
+    if transpose is None:
+        return "0/0/"
+    return f"{text_of(transpose, 'diatonic', '0')}/{text_of(transpose, 'chromatic', '0')}/{text_of(transpose, 'octave-change')}"
+
+
+def transpose_facts(attributes: ET.Element, staves: int) -> Iterator[tuple[str, str, str]]:
+    """One transposition per staff. A transpose without number applies to all staves; with numbers, a staff left
+    out has none."""
+    transposes = attributes.findall("transpose")
+    if not transposes:
+        return
+    common = next((t for t in transposes if t.get("number") is None), None)
+    for staff in map(str, range(1, staves + 1)):
+        own = next((t for t in transposes if t.get("number") == staff), common)
+        yield staff, "transpose", transpose_value(own)
+
+
+def attribute_facts(attributes: ET.Element, staves: int) -> Iterator[tuple[str, str, str]]:
     for clef in attributes.findall("clef"):
         value = f"{text_of(clef, 'sign')}{text_of(clef, 'line')}{text_of(clef, 'clef-octave-change')} {attrs(clef, 'size', 'after-barline')}"
         yield clef.get("number", "1"), "clef", value.strip()
@@ -88,8 +106,7 @@ def attribute_facts(attributes: ET.Element) -> Iterator[tuple[str, str, str]]:
     for details in attributes.findall("staff-details"):
         value = f"{text_of(details, 'staff-type')} size={text_of(details, 'staff-size')} {attrs(details, 'print-object')}"
         yield details.get("number", "1"), "staff-details", value
-    for transpose in attributes.findall("transpose"):
-        yield transpose.get("number", "all"), "transpose", f"{text_of(transpose, 'diatonic')}/{text_of(transpose, 'chromatic')}/{text_of(transpose, 'octave-change')}"
+    yield from transpose_facts(attributes, staves)
 
 
 def direction_facts(direction: ET.Element) -> Iterator[tuple[str, str]]:
@@ -155,7 +172,7 @@ def measure_facts(part_index: int, measure_index: int, measure: ET.Element, divi
         elif child.tag == "attributes":
             state.update(child)
             index = measure_index + is_trailing(measure, position)
-            yield from (fact(c, staff, v, index) for staff, c, v in attribute_facts(child))
+            yield from (fact(c, staff, v, index) for staff, c, v in attribute_facts(child, state.staves))
         elif child.tag == "direction":
             yield from (fact(c, direction_staff(measure, child, state), v) for c, v in direction_facts(child))
         elif child.tag == "figured-bass":
