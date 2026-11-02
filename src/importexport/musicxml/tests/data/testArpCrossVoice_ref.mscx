@@ -762,5 +762,11 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>I_I</startMeasure>
+        <endMeasure>OB_OB</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

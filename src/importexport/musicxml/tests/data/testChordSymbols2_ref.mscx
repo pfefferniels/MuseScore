@@ -250,5 +250,11 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>I_I</startMeasure>
+        <endMeasure>U_U</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

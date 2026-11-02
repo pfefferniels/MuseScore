@@ -348,5 +348,11 @@ Arranged by [Arranger]</metaTag>
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>J_J</startMeasure>
+        <endMeasure>W_W</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

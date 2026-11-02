@@ -317,5 +317,11 @@
         <track>0</track>
         </HairPin>
       </SpannerMap>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>H_H</startMeasure>
+        <endMeasure>i_i</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

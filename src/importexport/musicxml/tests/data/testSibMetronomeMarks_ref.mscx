@@ -378,5 +378,19 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>G_G</startMeasure>
+        <endMeasure>L_L</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>P_P</startMeasure>
+        <endMeasure>S_S</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>W_W</startMeasure>
+        <endMeasure>o_o</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

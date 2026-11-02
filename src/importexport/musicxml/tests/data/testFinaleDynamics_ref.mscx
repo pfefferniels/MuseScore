@@ -348,5 +348,11 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>H_H</startMeasure>
+        <endMeasure>j_j</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

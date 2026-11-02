@@ -1542,6 +1542,10 @@ void MusicXmlParserPass1::identification()
                 } else if (m_e.name() == "supports" && m_e.asciiAttribute("element") == "beam" && m_e.asciiAttribute("type") == "yes") {
                     m_hasBeamingInfo = true;
                     m_e.skipCurrentElement();
+                } else if (m_e.name() == "supports" && m_e.asciiAttribute("element") == "print"
+                           && m_e.asciiAttribute("attribute") == "new-system" && m_e.asciiAttribute("type") == "yes") {
+                    m_hasAllSystemBreaks = true;
+                    m_e.skipCurrentElement();
                 } else {
                     m_e.skipCurrentElement();
                 }

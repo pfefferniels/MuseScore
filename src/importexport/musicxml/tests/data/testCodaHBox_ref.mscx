@@ -443,5 +443,19 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>I_I</startMeasure>
+        <endMeasure>Q_Q</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>T_T</startMeasure>
+        <endMeasure>b_b</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>f_f</startMeasure>
+        <endMeasure>m_m</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

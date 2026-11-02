@@ -460,5 +460,11 @@ Arranged by [Arranger]</metaTag>
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>K_K</startMeasure>
+        <endMeasure>a_a</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

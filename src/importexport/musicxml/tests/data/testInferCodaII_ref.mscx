@@ -2618,5 +2618,39 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>I_I</startMeasure>
+        <endMeasure>d_d</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>0_0</startMeasure>
+        <endMeasure>KB_KB</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>iB_iB</startMeasure>
+        <endMeasure>6B_6B</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>UC_UC</startMeasure>
+        <endMeasure>pC_pC</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>AD_AD</startMeasure>
+        <endMeasure>WD_WD</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>yD_yD</startMeasure>
+        <endMeasure>ME_ME</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>oE_oE</startMeasure>
+        <endMeasure>EF_EF</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>hF_hF</startMeasure>
+        <endMeasure>dH_dH</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

@@ -582,5 +582,15 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>G_G</startMeasure>
+        <endMeasure>j_j</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>t_t</startMeasure>
+        <endMeasure>IB_IB</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

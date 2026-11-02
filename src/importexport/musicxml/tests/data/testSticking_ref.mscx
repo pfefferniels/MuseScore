@@ -689,5 +689,11 @@
         <track>0</track>
         </Slur>
       </SpannerMap>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>H_H</startMeasure>
+        <endMeasure>+_+</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

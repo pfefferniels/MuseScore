@@ -70,6 +70,7 @@
 #include "engraving/dom/partialtie.h"
 #include "engraving/dom/pedal.h"
 #include "engraving/dom/pitchspelling.h"
+#include "engraving/dom/rangelock.h"
 #include "engraving/dom/rehearsalmark.h"
 #include "engraving/dom/rest.h"
 #include "engraving/dom/score.h"
@@ -2124,6 +2125,7 @@ void MusicXmlParserPass2::scorePartwise()
     addError(checkAtEndElement(m_e, u"score-partwise"));
 
     addVerticalLayout();
+    lockPrintedSystems();
 
     for (const auto& [_, sysEl] : m_sysElements) {
         m_score->undoAddElement(sysEl);
@@ -3180,6 +3182,44 @@ static void addSpacer(Measure* measure, const staff_idx_t staffIdx, const Spacer
     // spacer gaps are in the staff's own spatium, MusicXML tenths are score-wide
     const double staffMag = measure->score()->staff(staffIdx)->staffMag(measure->tick());
     spacer->setGap(Spatium(std::max(0.0, tenths) / 10.0 / staffMag));
+}
+
+//---------------------------------------------------------
+//   lockPrintedSystems
+//---------------------------------------------------------
+
+/**
+ Keep the measures of each printed system together in one system, so that
+ layout reproduces the printed systems even where its spacing is wider than
+ the engraver's. Only done when the encoding declares that it gives every
+ system break, as otherwise a printed system may stand for several.
+ */
+
+void MusicXmlParserPass2::lockPrintedSystems()
+{
+    if (!configuration()->importLayout() || !configuration()->importBreaks() || !m_pass1.hasAllSystemBreaks()) {
+        return;
+    }
+
+    std::vector<Measure*> measures;
+    for (Measure* m = m_score->firstMeasure(); m; m = m->nextMeasure()) {
+        measures.push_back(m);
+    }
+    const std::set<int>& systemStarts = m_pass1.systemStartMeasureNrs();
+    const std::set<int>& pageStarts = m_pass1.pageStartMeasureNrs();
+
+    size_t first = 0;
+    while (first < measures.size()) {
+        size_t last = first + 1;
+        while (last < measures.size() && !muse::contains(systemStarts, int(last)) && !muse::contains(pageStarts, int(last))) {
+            ++last;
+        }
+        --last;
+        if (last > first) {
+            m_score->addSystemLock(new RangeLock(measures[first], measures[last]));
+        }
+        first = last + 1;
+    }
 }
 
 //---------------------------------------------------------

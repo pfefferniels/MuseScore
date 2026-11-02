@@ -344,5 +344,11 @@
         <track>0</track>
         </Ottava>
       </SpannerMap>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>H_H</startMeasure>
+        <endMeasure>Q_Q</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

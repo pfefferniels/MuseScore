@@ -283,5 +283,11 @@
         <track>0</track>
         </Ottava>
       </SpannerMap>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>G_G</startMeasure>
+        <endMeasure>P_P</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

@@ -211,5 +211,11 @@
         <track>0</track>
         </GradualTempoChange>
       </SpannerMap>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>G_G</startMeasure>
+        <endMeasure>S_S</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

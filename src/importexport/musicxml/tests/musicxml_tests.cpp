@@ -33,6 +33,7 @@
 #include "engraving/dom/note.h"
 #include "engraving/dom/page.h"
 #include "engraving/dom/partialtie.h"
+#include "engraving/dom/rangelock.h"
 #include "engraving/dom/segment.h"
 #include "engraving/dom/staff.h"
 #include "engraving/dom/stafftype.h"
@@ -1387,6 +1388,26 @@ TEST_F(MusicXml_Tests, systemDistancesLayout)
     }
     const Page* page2 = score->pages().at(1);
     EXPECT_NEAR(page2->systems().front()->y() - page2->tm(), 10.0 * spatium, 0.05 * spatium);
+    delete score;
+}
+TEST_F(MusicXml_Tests, systemLocks)
+{
+    // all system breaks are declared, so the printed systems are kept although they are too dense
+    MasterScore* score = readScore(XML_IO_DATA_DIR + u"testSystemLocks.xml");
+    ASSERT_TRUE(score);
+    score->doLayout();
+    EXPECT_EQ(score->systemLocks()->allLocks().size(), 2u);
+    ASSERT_EQ(score->systems().size(), 3u);   // with the header frame
+    EXPECT_EQ(score->systems().at(1)->measures().size(), 12u);
+    EXPECT_EQ(score->systems().at(2)->measures().size(), 12u);
+    delete score;
+
+    // without the declaration a system break may stand for several systems
+    score = readScore(XML_IO_DATA_DIR + u"testSystemLocksUndeclared.xml");
+    ASSERT_TRUE(score);
+    score->doLayout();
+    EXPECT_TRUE(score->systemLocks()->allLocks().empty());
+    EXPECT_GT(score->systems().size(), 3u);
     delete score;
 }
 TEST_F(MusicXml_Tests, systemObjectStaves) {

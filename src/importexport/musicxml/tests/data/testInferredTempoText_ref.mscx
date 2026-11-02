@@ -355,5 +355,27 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>F_F</startMeasure>
+        <endMeasure>K_K</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>O_O</startMeasure>
+        <endMeasure>R_R</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>V_V</startMeasure>
+        <endMeasure>Y_Y</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>c_c</startMeasure>
+        <endMeasure>f_f</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>j_j</startMeasure>
+        <endMeasure>m_m</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

@@ -915,5 +915,11 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>U_U</startMeasure>
+        <endMeasure>a_a</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

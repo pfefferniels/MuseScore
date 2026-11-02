@@ -2659,5 +2659,31 @@
         <track>0</track>
         </HairPin>
       </SpannerMap>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>J_J</startMeasure>
+        <endMeasure>EB_EB</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>YB_YB</startMeasure>
+        <endMeasure>FC_FC</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>IC_IC</startMeasure>
+        <endMeasure>JD_JD</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>SD_SD</startMeasure>
+        <endMeasure>SE_SE</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>cE_cE</startMeasure>
+        <endMeasure>UF_UF</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>dF_dF</startMeasure>
+        <endMeasure>VG_VG</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

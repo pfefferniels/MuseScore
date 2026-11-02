@@ -748,5 +748,11 @@
         <track>4</track>
         </HairPin>
       </SpannerMap>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>J_J</startMeasure>
+        <endMeasure>w_w</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>

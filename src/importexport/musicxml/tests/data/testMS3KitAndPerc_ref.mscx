@@ -3474,5 +3474,47 @@
           </voice>
         </Measure>
       </Staff>
+    <SystemLocks>
+      <systemLock>
+        <startMeasure>J_J</startMeasure>
+        <endMeasure>m_m</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>w_w</startMeasure>
+        <endMeasure>LB_LB</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>VB_VB</startMeasure>
+        <endMeasure>wB_wB</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>6B_6B</startMeasure>
+        <endMeasure>VC_VC</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>fC_fC</startMeasure>
+        <endMeasure>6C_6C</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>ED_ED</startMeasure>
+        <endMeasure>fD_fD</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>pD_pD</startMeasure>
+        <endMeasure>9D_9D</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>AE_AE</startMeasure>
+        <endMeasure>OE_OE</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>RE_RE</startMeasure>
+        <endMeasure>fE_fE</endMeasure>
+        </systemLock>
+      <systemLock>
+        <startMeasure>iE_iE</startMeasure>
+        <endMeasure>2E_2E</endMeasure>
+        </systemLock>
+      </SystemLocks>
     </Score>
   </museScore>
