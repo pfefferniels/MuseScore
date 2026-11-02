@@ -697,6 +697,16 @@ TEST_F(MusicXml_Tests, excessHiddenStaves) {
 TEST_F(MusicXml_Tests, extendedLyrics) {
     musicXmlIoTestRef("testExtendedLyrics");
 }
+TEST_F(MusicXml_Tests, fillGapRests1) {
+    musicXmlImportTestRef("testFillGapRests");
+}
+TEST_F(MusicXml_Tests, fillGapRests2) {
+    musicXmlIoTestRef("testFillGapRests");
+}
+TEST_F(MusicXml_Tests, fillGapRestsRoundTrip) {
+    // the rests filling a gap read back as the same rests
+    musicXmlIoTest("testFillGapRests_ref");
+}
 TEST_F(MusicXml_Tests, figuredBass1) {
     musicXmlIoTest("testFiguredBass1");
 }

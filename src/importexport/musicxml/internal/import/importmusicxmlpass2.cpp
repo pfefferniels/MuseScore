@@ -355,30 +355,34 @@ static void xmlSetPitch(Note* n, int step, int alter, double tuning, int octave,
 
 static void fillGap(Measure* measure, track_idx_t track, const Fraction& tstart, const Fraction& tend)
 {
-    Fraction ctick = tstart;
-    Fraction restLen = tend - tstart;
-    // LOGD("\nfillGIFV     fillGap(measure %p track %d tstart %d tend %d) restLen %d len",
-    //        measure, track, tstart, tend, restLen);
+    const Fraction len = tend - tstart;
     // note: as Constants::division (#ticks in a quarter note) equals 480
     // Constants::division / 64 (#ticks in a 256th note) equals 7.5 but is rounded down to 7
-    while (restLen > Fraction(1, 256)) {
-        Fraction len = restLen;
-        TDuration d(DurationType::V_INVALID);
-        if (measure->ticks() == restLen) {
-            d.setType(DurationType::V_MEASURE);
-        } else {
-            d.setVal(len.ticks());
-        }
-        Segment* s = measure->getSegment(SegmentType::ChordRest, tstart);
+    if (len <= Fraction(1, 256)) {
+        return;
+    }
+    std::vector<TDuration> durations;
+    TDuration single(DurationType::V_INVALID);
+    if (measure->ticks() == len) {
+        single.setType(DurationType::V_MEASURE);
+    } else {
+        single.setVal(len.ticks());
+    }
+    if (single.isMeasure() || single.fraction() == len) {
+        durations.push_back(single);
+    } else {
+        // a rest's type has to match its length, or the file written from it reads back differently
+        durations = toDurationList(len, true);
+    }
+    Fraction ctick = tstart;
+    for (const TDuration& d : durations) {
+        Segment* s = measure->getSegment(SegmentType::ChordRest, ctick);
         Rest* rest = Factory::createRest(s, d);
-        rest->setTicks(len);
+        rest->setTicks(d.isMeasure() ? len : d.fraction());
         rest->setTrack(track);
         rest->setVisible(false);
         s->add(rest);
-        len = rest->globalTicks();
-        // LOGD(" %d", len);
-        ctick   += len;
-        restLen -= len;
+        ctick += rest->globalTicks();
     }
 }
 
