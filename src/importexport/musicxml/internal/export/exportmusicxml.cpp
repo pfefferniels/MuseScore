@@ -4228,11 +4228,9 @@ static void writeType(XmlWriter& xml, const Note* const note)
         LOGD("no note type found for fraction %d / %d", strActFraction.numerator(), strActFraction.denominator());
     }
 
-    // small notes are indicated by size=cue, but for grace and cue notes this is implicit
-    if (isSmallNote(note) && !isCueNote(note) && !note->chord()->isGrace()) {
-        xml.tag("type", { { "size", "cue" } }, s);
-    } else if (isSmallNote(note) && !isCueNote(note) && note->chord()->isGrace()) {
-        xml.tag("type", { { "size", "grace-cue" } }, s);
+    // write the size of cue notes too, readers do not all apply the default
+    if (isSmallNote(note)) {
+        xml.tag("type", { { "size", note->chord()->isGrace() ? "grace-cue" : "cue" } }, s);
     } else {
         xml.tag("type", s);
     }

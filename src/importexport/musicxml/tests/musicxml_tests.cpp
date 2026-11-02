@@ -525,7 +525,7 @@ TEST_F(MusicXml_Tests, cueGraceNotes2) {
     musicXmlIoTestRef("testCueGraceNotes");
 }
 TEST_F(MusicXml_Tests, cueNotes) {
-    musicXmlIoTest("testCueNotes");
+    musicXmlIoTestRef("testCueNotes");
 }
 TEST_F(MusicXml_Tests, cueNotes2) {
     musicXmlMscxExportTestRef("testCueNotes2");
