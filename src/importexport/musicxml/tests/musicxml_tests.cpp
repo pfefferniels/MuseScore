@@ -509,6 +509,9 @@ TEST_F(MusicXml_Tests, completeMeasureRests) {
 TEST_F(MusicXml_Tests, copyrightScale) {
     musicXmlImportTestRef("testCopyrightScale");
 }
+TEST_F(MusicXml_Tests, courtesyAccidentals) {
+    musicXmlImportTestRef("testCourtesyAccidentals");
+}
 TEST_F(MusicXml_Tests, cueGraceNotes1) {
     musicXmlImportTestRef("testCueGraceNotes");
 }

@@ -818,7 +818,6 @@
             <Note>
               <eid>+B_+B</eid>
               <Accidental>
-                <role>1</role>
                 <subtype>accidentalNatural</subtype>
                 <eid>/B_/B</eid>
                 </Accidental>

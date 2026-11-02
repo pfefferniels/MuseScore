@@ -2545,58 +2545,78 @@ static void handleBeamAndStemDir(ChordRest* cr, const BeamMode bm, const Directi
 //---------------------------------------------------------
 
 /**
- Check for "superfluous" accidentals to mark them as USER accidentals.
- The candidate map alterMap is ordered on note address. Check it here segment after segment.
+ Mark the accidentals read from the file that layout would not show by itself
+ as USER accidentals, so that they are kept. Follows the accidental state of each
+ staff the way layout does, grace notes included. Notes sounding at the same time
+ are checked against the state before them, as the file may print the accidental
+ on any of them.
  */
 
 static void markUserAccidentals(const staff_idx_t firstStaff,
                                 const size_t staves,
-                                const Key key,
                                 const Measure* measure,
                                 const std::map<Note*, int>& alterMap)
 {
-    std::map<int, bool> accTmp;
+    const Score* score = measure->score();
+    const track_idx_t startTrack = firstStaff * VOICES;
+    const track_idx_t endTrack = (firstStaff + staves) * VOICES;
 
-    AccidentalState currAcc;
-    currAcc.init(key);
-    SegmentType st = SegmentType::ChordRest;
-    for (mu::engraving::Segment* segment = measure->first(st); segment; segment = segment->next(st)) {
-        for (track_idx_t track = 0; track < staves * VOICES; ++track) {
-            EngravingItem* e = segment->element(firstStaff * VOICES + track);
-            if (!e || !e->isChord()) {
+    for (staff_idx_t staffIdx = firstStaff; staffIdx < firstStaff + staves; ++staffIdx) {
+        const Staff* staff = score->staff(staffIdx);
+        AccidentalState currAcc;
+        currAcc.init(staff->keySigEvent(measure->tick()));
+
+        auto markNotes = [&](const Chord* chord, const AccidentalState& prevAcc) {
+            if (chord->vStaffIdx() != staffIdx) {
+                return;
+            }
+            for (Note* nt : chord->notes()) {
+                const int line = absStep(nt->tpc(), nt->epitch());
+                bool error = false;
+                const AccidentalVal prevAccVal = prevAcc.accidentalVal(line, error);
+                if (error) {
+                    continue;
+                }
+                const AccidentalVal noteAccVal = tpc2alter(nt->tpc());
+                if (muse::contains(alterMap, nt)) {
+                    const AccidentalType accType = nt->accidental()->accidentalType();
+                    if (Accidental::isMicrotonal(accType) && accType < AccidentalType::END) {
+                        nt->accidental()->setRole(AccidentalRole::USER);
+                    } else if (prevAccVal == noteAccVal && Accidental::subtype2value(accType) == noteAccVal) {
+                        nt->accidental()->setRole(AccidentalRole::USER);
+                    }
+                }
+                currAcc.setAccidentalVal(line, noteAccVal);
+            }
+        };
+
+        for (const Segment* segment = measure->first(); segment; segment = segment->next()) {
+            if (segment->isKeySigType()) {
+                currAcc.init(staff->keySigEvent(segment->tick()));
                 continue;
             }
-            Chord* chord = toChord(e);
-            for (Note* nt : chord->notes()) {
-                if (muse::contains(alterMap, nt)) {
-                    int alter = alterMap.at(nt);
-                    int ln  = absStep(nt->tpc(), nt->pitch());
-                    bool error = false;
-                    AccidentalVal currAccVal = currAcc.accidentalVal(ln, error);
-                    if (error) {
-                        continue;
-                    }
-                    if ((alter == -1
-                         && currAccVal == AccidentalVal::FLAT
-                         && nt->accidental()->accidentalType() == AccidentalType::FLAT
-                         && !muse::value(accTmp, ln, false))
-                        || (alter == 0
-                            && currAccVal == AccidentalVal::NATURAL
-                            && nt->accidental()->accidentalType() == AccidentalType::NATURAL
-                            && !muse::value(accTmp, ln, false))
-                        || (alter == 1
-                            && currAccVal == AccidentalVal::SHARP
-                            && nt->accidental()->accidentalType() == AccidentalType::SHARP
-                            && !muse::value(accTmp, ln, false))) {
-                        nt->accidental()->setRole(AccidentalRole::USER);
-                    } else if (Accidental::isMicrotonal(nt->accidental()->accidentalType())
-                               && nt->accidental()->accidentalType() < AccidentalType::END) {
-                        // microtonal accidental
-                        nt->accidental()->setRole(AccidentalRole::USER);
-                        accTmp.insert({ ln, false });
-                    } else {
-                        accTmp.insert({ ln, true });
-                    }
+            if (!segment->isChordRestType()) {
+                continue;
+            }
+            std::vector<const Chord*> chords;
+            for (track_idx_t track = startTrack; track < endTrack; ++track) {
+                const EngravingItem* e = segment->element(track);
+                if (e && e->isChord()) {
+                    chords.push_back(toChord(e));
+                }
+            }
+            for (const Chord* chord : chords) {
+                for (const Chord* grace : chord->graceNotesBefore()) {
+                    markNotes(grace, currAcc);
+                }
+            }
+            const AccidentalState prevAcc = currAcc;
+            for (const Chord* chord : chords) {
+                markNotes(chord, prevAcc);
+            }
+            for (const Chord* chord : chords) {
+                for (const Chord* grace : chord->graceNotesAfter()) {
+                    markNotes(grace, currAcc);
                 }
             }
         }
@@ -3004,8 +3024,7 @@ void MusicXmlParserPass2::measure(const String& partId, const Fraction time)
 
     // mark superfluous accidentals as user accidentals
     const staff_idx_t scoreRelStaff = m_score->staffIdx(part);
-    const Key key = m_score->staff(scoreRelStaff)->keySigEvent(time).key();
-    markUserAccidentals(scoreRelStaff, part->nstaves(), key, measure, alterMap);
+    markUserAccidentals(scoreRelStaff, part->nstaves(), measure, alterMap);
 
     // multi-measure rest handling
     if (getAndDecMultiMeasureRestCount() == 0) {
